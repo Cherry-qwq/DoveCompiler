@@ -1,11 +1,13 @@
-# CMakeList.txt : CMake project for Codeforces_Round_740_Div.2, include source and define
-# project specific logic here.
-#
 cmake_minimum_required (VERSION 3.8)
 
 project ("DoveCompiler")
 
-# Add source to this project's executable.
-add_executable (Main "src/main.cc")
-
 # TODO: Add tests and install targets if needed.
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+enable_testing()
+
+add_subdirectory(src)
+# add_subdirectory(tests)
