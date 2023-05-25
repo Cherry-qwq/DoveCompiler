@@ -1,0 +1,7 @@
+/home/cherry/下载/DoveCompiler-main/CMakeFiles/rebuild_cache.dir
+/home/cherry/下载/DoveCompiler-main/CMakeFiles/edit_cache.dir
+/home/cherry/下载/DoveCompiler-main/CMakeFiles/test.dir
+/home/cherry/下载/DoveCompiler-main/src/CMakeFiles/rebuild_cache.dir
+/home/cherry/下载/DoveCompiler-main/src/CMakeFiles/edit_cache.dir
+/home/cherry/下载/DoveCompiler-main/src/CMakeFiles/test.dir
+/home/cherry/下载/DoveCompiler-main/src/CMakeFiles/Main.dir
