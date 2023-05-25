@@ -1,4 +1,6 @@
 /build
+/bin
+CMakeCache.txt
 
 # Prerequisites
 *.d
