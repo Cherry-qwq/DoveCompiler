@@ -1,0 +1,41 @@
+name: CMake
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
+    # You can convert this to a matrix build if you need cross-platform coverage.
+    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: actions/setup-python@v4
+      with:
+      python-version: '3.10'
+      cache: 'pip' # caching pip dependencies
+    
+    - name: Install pip packages
+      run: pip install -r requirements.txt
+
+    - name: Download ANTLR
+      run: make env/antlr
+
+    - name: Generate includes
+      run: | 
+            make includes/runtime 
+            make includes/generated
+    
+    - name: Build
+      run: make build
+
