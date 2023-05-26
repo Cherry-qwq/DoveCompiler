@@ -1,4 +1,4 @@
-name: CMake
+name: Build
 
 on:
   push:
@@ -22,14 +22,22 @@ jobs:
 
     - uses: actions/setup-python@v4
       with:
-      python-version: '3.10'
-      cache: 'pip' # caching pip dependencies
+        python-version: '3.10'
+        cache: 'pip'
     
+    - name: Update pip
+      run: pip install --upgrade pip
+
     - name: Install pip packages
-      run: pip install -r requirements.txt
+      run: |
+            pip install antlr4-tools
+            pip install conan==1.60
 
     - name: Download ANTLR
       run: make env/antlr
+
+    - name: Prepare Conan
+      run: conan profile new default --detect
 
     - name: Generate includes
       run: | 
