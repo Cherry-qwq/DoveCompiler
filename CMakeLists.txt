@@ -2,7 +2,6 @@ cmake_minimum_required (VERSION 3.8)
 
 project ("DoveCompiler")
 
-# TODO: Add tests and install targets if needed.
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -28,7 +27,10 @@ conan_basic_setup()
 link_libraries(${CONAN_LIBS})
 
 
-file(GLOB generated includes/generated/*.cpp includes/generated/*.h)
+file(GLOB generated 
+	includes/generated/*.cpp 
+	includes/generated/*.h
+)
 
 
 add_subdirectory(src)
