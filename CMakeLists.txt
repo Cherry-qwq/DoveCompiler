@@ -2,6 +2,7 @@ cmake_minimum_required (VERSION 3.8)
 
 project ("DoveCompiler")
 
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -12,6 +13,7 @@ add_compile_options(
 	-Wno-unused-parameter
 	-Wno-unused-variable
 	-Wno-unknown-pragmas
+	-std=gnu++17
 )
 
 add_link_options(-lpthread -lm -v -pthread)
@@ -26,23 +28,25 @@ include(${PROJECT_SOURCE_DIR}/includes/runtime/conanbuildinfo.cmake)
 conan_basic_setup()
 link_libraries(${CONAN_LIBS})
 
-
 file(GLOB generated 
-	includes/generated/*.cpp 
-	includes/generated/*.h
+	includes/generated/*.cpp
 )
 
 
 add_subdirectory(src)
 
 add_executable(DoveCompiler
-	# ${generated}
+	${generated}
 	"src/main.cc"
 )
-
-
+# target_link_libraries(DoveCompiler PUBLIC ${CONAN_LIBS})
 target_include_directories(DoveCompiler PUBLIC
-	# includes/generated
+	includes/generated
 	src
 )
+
+
+
+
+
 # add_subdirectory(tests)

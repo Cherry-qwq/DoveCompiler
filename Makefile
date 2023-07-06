@@ -1,3 +1,7 @@
+env/conan_profile:
+	conan profile update settings.compiler.libcxx=libstdc++11 default
+	
+
 env/conan:
 	pip3 install conan
 
@@ -7,8 +11,8 @@ env/antlr:
 
 includes/runtime: res/conan/conanfile.txt
 	mkdir -p $@
-	cd $@ && conan install ../../res/conan/conanfile.txt
-	touch $@
+	cd $@ && conan install ../../res/conan
+
 
 includes/generated: res/antlr/SysY.g4 res/antlr/CommonLex.g4 res/antlr/antlr-4.12.0-complete.jar
 	mkdir -p $@
