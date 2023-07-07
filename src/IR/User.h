@@ -9,7 +9,7 @@ namespace IR
     unsigned NumOperands;
 
   public:
-    User(Type type, unsigned numOperands);
+    User(PrimitiveDataType type, unsigned numOperands);
     virtual ~User();
 
     unsigned getNumOperands() const { return NumOperands; }

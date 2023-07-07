@@ -4,12 +4,12 @@ namespace IR
 {
   class Value
   {
-    Type type_;
+    PrimitiveDataType type_;
 
   public:
-    Value(Type type);
+    Value(PrimitiveDataType type);
     virtual ~Value();
 
-    Type getType() const { return type_; }
+    PrimitiveDataType getType() const { return type_; }
   };
 }
