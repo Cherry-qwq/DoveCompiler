@@ -10,7 +10,7 @@ namespace config
 	Config &init(int argc, char **argv)
 	{
 		up = std::make_unique<Config>();
-		auto argParser = argparse::ArgumentParser program(CONSTANTS::program_name);
+		auto argParser = argparse::ArgumentParser(CONSTANTS::program_name);
 		argParser.add_argument("srcFilePath")
 				.help("Source File.")
 				.required();

@@ -3,6 +3,8 @@
 #include <SysYLexer.h>
 #include <SysYParser.h>
 
+#include "Utils/configure.h"
+#include "CodeParser/VisitorImpl.h"
 int main(int argc, char *argv[])
 {
 	config::init(argc, argv);
@@ -11,14 +13,14 @@ int main(int argc, char *argv[])
 	auto source = std::ifstream();
 	source.open(config::get().srcFilePath);
 	antlr4::ANTLRInputStream input(source);
-	CodeParser::SysYLexer mLexer(&input);
+	front::SysYLexer mLexer(&input);
 	antlr4::CommonTokenStream tokens(&mLexer);
-	CodeParser::SysYParser mParser(&tokens);
+	front::SysYParser mParser(&tokens);
 	mParser.setErrorHandler(std::make_shared<antlr4::BailErrorStrategy>());
-	CodeParser::SysYParser::CompUnitContext *root = mParser.compUnit();
+	front::SysYParser::CompUnitContext *root = mParser.compUnit();
 
 	//	frontend : ast => ir
-	auto Visitor = CodeParser::VisitorImpl();
+	auto Visitor = front::VisitorImpl();
 	// auto r = std::any_cast<std::shared_ptr<mir::CompUnitSsa>>(root->accept(&astVisitor));
 	// auto dh = mir::DumpHelper();
 	// println(r->dump(dh));

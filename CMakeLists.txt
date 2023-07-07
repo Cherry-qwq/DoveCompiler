@@ -32,32 +32,33 @@ file(GLOB generated
 	includes/generated/*.cpp
 )
 
-
 add_subdirectory(src)
 
-file(GLOB Parser 
-	includes/Parser/*.cc
-	includes/Parser/*.h
+file(GLOB CodeParser 
+	src/CodeParser/*.cc
+	src/CodeParser/*.h
 )
 
 file(GLOB IR 
-	includes/IR/*.cc
-	includes/IR/*.h)
+	src/IR/*.cc
+	src/IR/*.h)
 
 file(GLOB Utils
-	includes/Utils/*.cc
-	includes/Util/s*.h
+	src/Utils/*.cc
+	src/Utils/*.h
 )
 
 add_executable(DoveCompiler
 	${generated}
 	"src/main.cc"
+	${CodeParser}
+	${IR}
+	${Utils}
 )
 target_link_libraries(DoveCompiler PUBLIC ${CONAN_LIBS})
 target_include_directories(DoveCompiler PUBLIC
 	includes/deps
 	includes/generated
-	src
 )
 
 

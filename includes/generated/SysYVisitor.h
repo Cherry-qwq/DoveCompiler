@@ -10,16 +10,10 @@
 
 namespace front {
 
-/**
- * This class defines an abstract visitor for a parse tree
- * produced by SysYParser.
- */
+
 class  SysYVisitor : public antlr4::tree::AbstractParseTreeVisitor {
 public:
 
-  /**
-   * Visit parse trees produced by SysYParser.
-   */
     virtual std::any visitCompUnit(SysYParser::CompUnitContext *context) = 0;
 
     virtual std::any visitDecl(SysYParser::DeclContext *context) = 0;
