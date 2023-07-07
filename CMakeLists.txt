@@ -26,7 +26,7 @@ enable_testing()
 
 include(${PROJECT_SOURCE_DIR}/includes/runtime/conanbuildinfo.cmake)
 conan_basic_setup()
-link_libraries(${CONAN_LIBS})
+# link_libraries(${CONAN_LIBS})
 
 file(GLOB generated 
 	includes/generated/*.cpp
@@ -35,12 +35,27 @@ file(GLOB generated
 
 add_subdirectory(src)
 
+file(GLOB Parser 
+	includes/Parser/*.cc
+	includes/Parser/*.h
+)
+
+file(GLOB IR 
+	includes/IR/*.cc
+	includes/IR/*.h)
+
+file(GLOB Utils
+	includes/Utils/*.cc
+	includes/Util/s*.h
+)
+
 add_executable(DoveCompiler
 	${generated}
 	"src/main.cc"
 )
-# target_link_libraries(DoveCompiler PUBLIC ${CONAN_LIBS})
+target_link_libraries(DoveCompiler PUBLIC ${CONAN_LIBS})
 target_include_directories(DoveCompiler PUBLIC
+	includes/deps
 	includes/generated
 	src
 )
