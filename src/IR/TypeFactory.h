@@ -1,0 +1,7 @@
+
+namespace IR
+{
+  class TypeFactory
+  {
+  };
+}

@@ -39,5 +39,6 @@ build: build/bin/DoveCompiler
 include tests/config.mk
 testFileBase ?= main
 
-test:	mkdir -p build && cd build && cmake .. -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Build && make
-	build/ tests/${testFileBase}.sysy -o test/${testFileBase}.S ${options}
+test:	
+	mkdir -p build && cd build && cmake .. -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Build && make
+	build/bin/DoveCompiler tests/${testFileBase}.sysy -o test/${testFileBase}.S ${options}

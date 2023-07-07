@@ -1,0 +1,6 @@
+namespace IR
+{
+  class Use
+  {
+  };
+}
