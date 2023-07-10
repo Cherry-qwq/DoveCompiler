@@ -20,8 +20,6 @@ add_link_options(-lpthread -lm -v -pthread)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/build)
 
-
-
 enable_testing()
 
 include(${PROJECT_SOURCE_DIR}/includes/runtime/conanbuildinfo.cmake)
@@ -34,26 +32,14 @@ file(GLOB generated
 
 add_subdirectory(src)
 
-file(GLOB CodeParser 
-	src/CodeParser/*.cc
-	src/CodeParser/*.h
-)
-
-file(GLOB IR 
-	src/IR/*.cc
-	src/IR/*.h)
-
-file(GLOB Utils
-	src/Utils/*.cc
-	src/Utils/*.h
+file(GLOB_RECURSE src
+	"src/*.cc"
+	"src/*.h"
 )
 
 add_executable(DoveCompiler
 	${generated}
-	"src/main.cc"
-	${CodeParser}
-	${IR}
-	${Utils}
+	${src}
 )
 target_link_libraries(DoveCompiler PUBLIC ${CONAN_LIBS})
 target_include_directories(DoveCompiler PUBLIC
