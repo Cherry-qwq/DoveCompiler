@@ -2,7 +2,7 @@
 
 #include "Type.h"
 
-namespace IR
+namespace ir
 {
   class Value
   {

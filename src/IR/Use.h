@@ -1,4 +1,4 @@
-namespace IR
+namespace ir
 {
   class Use
   {

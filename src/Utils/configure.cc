@@ -1,4 +1,4 @@
-#include "configure.h"
+#include "Configure.h"
 #include "CONSTANTS.h"
 #include <memory>
 #include <argparse.h>

@@ -1,7 +1,7 @@
 #include "Use.h"
 #include "Value.h"
 
-namespace IR
+namespace ir
 {
   class User : public Value
   {

@@ -2,7 +2,7 @@
 #include <memory>
 #include <string>
 
-namespace IR
+namespace ir
 {
   class Type
   {

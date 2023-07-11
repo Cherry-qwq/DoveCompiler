@@ -1,0 +1,8 @@
+int GlobalVariable;
+int main(){
+  GlobalVariable=1;
+  int LocalVariable;
+  LocalVariable=0;
+  return 0;
+}
+

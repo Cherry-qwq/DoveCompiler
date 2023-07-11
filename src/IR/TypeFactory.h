@@ -1,5 +1,5 @@
 
-namespace IR
+namespace ir
 {
   class TypeFactory
   {
