@@ -10,10 +10,10 @@
 
 namespace ir
 {
-    class Integer : public User
+    class Constant : public User
   {
   public:
-    explicit Integer(uint32_t val) : User(MakePrimitiveDataType(PrimitiveDataType::TypeID::Int32),1) {}
+    explicit Constant(uint32_t val) : User(MakePrimitiveDataType(PrimitiveDataType::TypeID::Int32),1) {}
     std::string dump() const override {
       return std::to_string(val);
     }
