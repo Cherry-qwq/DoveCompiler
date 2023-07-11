@@ -9,8 +9,7 @@ namespace ir
     unsigned NumOperands;
 
   public:
-    User(PrimitiveDataType type, unsigned numOperands);
-    virtual ~User();
+    User(std::unique_ptr<Type> type, unsigned numOperands);
 
     unsigned getNumOperands() const { return NumOperands; }
     Use *getOperandList() const { return OperandList; }

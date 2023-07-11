@@ -12,7 +12,7 @@ namespace ir
 
   public:
     Value(std::unique_ptr<Type> type, std::string name) : type_(std::move(type)), name_(std::move(name)) {}
-    // virtual std::string dump(DumpHelper &dh) const = 0;
+    virtual std::string dump() const = 0;
     bool bindUse(Use *use)
     {
       if (uses_.count(use))

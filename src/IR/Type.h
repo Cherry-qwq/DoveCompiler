@@ -48,7 +48,7 @@ namespace ir
   protected:
     TypeID type_;
   };
-  std::unique_ptr<PrimitiveDataType> makePrimitiveDataType(PrimitiveDataType::TypeID id)
+  std::unique_ptr<PrimitiveDataType> MakePrimitiveDataType(PrimitiveDataType::TypeID id)
   {
     return std::make_unique<PrimitiveDataType>(id);
   }
@@ -70,12 +70,12 @@ namespace ir
   protected:
     std::unique_ptr<Type> ref_;
   };
-  std::unique_ptr<PointerType> makePointer(std::unique_ptr<Type> ref)
+  std::unique_ptr<PointerType> MakePointer(std::unique_ptr<Type> ref)
   {
     return std::make_unique<PointerType>(std::move(ref));
   }
 
-  std::unique_ptr<Type> makeType(std::unique_ptr<Type> ptr)
+  std::unique_ptr<Type> MakeType(std::unique_ptr<Type> ptr)
   {
     // moe_assert(dynamic_cast<PointerType *>(pointer.get()));
     auto p = std::unique_ptr<PointerType>(dynamic_cast<PointerType *>(ptr.release()));
