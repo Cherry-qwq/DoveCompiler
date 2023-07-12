@@ -1,5 +1,5 @@
 
-# Instructions.h
+# MemoryAccess.h
 - [ ] `ir::Constant`
 - [ ] `ir::Allocate`
 - [ ] `ir::Load`
@@ -27,16 +27,17 @@
 
 # ConrtrolFlow.h
 
-- [ ] `ir::Function`
 - [ ] `ir::BasicBlock`
+- [ ] `ir::Function`
+- [ ] `ir::Branch`
 - [ ] `ir::Return`
 - [ ] `ir::Phi`
 
-
+#### `ir::BasicBlock`
 
 #### `ir::Function`
 
-#### `ir::BasicBlock`
+#### `ir::Branch`
 
 #### `ir::Return`
 

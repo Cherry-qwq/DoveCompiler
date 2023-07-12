@@ -42,6 +42,6 @@ namespace ir
 
     std::unique_ptr<Type> getType() const { return type_->get(); }
 
-    virtual bool isConstant() const { return false; }
+    virtual bool isConstant() const = 0;
   };
 }
