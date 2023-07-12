@@ -1,10 +1,10 @@
 
-# UserImpl.h
-
+# Instructions.h
 - [ ] `ir::Constant`
 - [ ] `ir::Allocate`
 - [ ] `ir::Load`
- 
+- [ ] `ir::Store`
+
 
 #### `ir::Constant`
 
@@ -17,22 +17,25 @@
   ##### Extended Methods
   - `std::string dump()`
 
-
-
-  
-
 #### `ir::Allocate`
 
   用于开拓内存空间，并指示类型
 
 #### `ir::Load`
   
+# ConrtrolFlow.h
 
+- [ ] `ir::Function`
+- [ ] `ir::BasicBlock`
+- [ ] `ir::Return`
+- [ ] `ir::Phi`
 
 #### `ir::Store`
 
-BasicBlock
-#### `ir::Return`
+#### `ir::Function`
 
+#### `ir::BasicBlock`
+
+#### `ir::Return`
 
 #### `ir::Phi`

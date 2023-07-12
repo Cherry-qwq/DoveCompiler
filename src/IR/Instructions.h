@@ -38,4 +38,15 @@ namespace ir
     std::unique_ptr<Type> type_;
   };
 
+  class Load : public User
+  {
+    //TODO
+  };
+
+  class Store : public User
+  {
+    //TODO
+  };
+
+
 }
