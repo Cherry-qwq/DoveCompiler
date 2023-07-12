@@ -12,8 +12,9 @@ namespace ir
   public:
     Use(std::shared_ptr<Value> val, User *user) : val_(val), user_(user) {}
     std::shared_ptr<Value> getValue() const { return val_; }
-    User *getUser() const { return user_; }
     void setValue(std::shared_ptr<Value> val) { val_ = val; }
+
+    User *getUser() const { return user_; }
     void setUser(User *user) { user_ = user; }
 
   protected:

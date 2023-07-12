@@ -70,7 +70,7 @@ namespace ir
   protected:
     std::unique_ptr<Type> ref_;
   };
-  std::unique_ptr<PointerType> MakePointer(std::unique_ptr<Type> ref)
+  std::unique_ptr<PointerType> MakePointerType(std::unique_ptr<Type> ref)
   {
     return std::make_unique<PointerType>(std::move(ref));
   }

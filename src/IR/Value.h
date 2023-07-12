@@ -1,4 +1,9 @@
+#pragma once
+
 #include <set>
+#include <memory>
+#include <algorithm>
+#include <string>
 
 #include "Type.h"
 
@@ -23,6 +28,7 @@ namespace ir
     }
     bool unbindUse(Use *use)
     {
+      
       if (!uses_.count(use))
         return false;
 
