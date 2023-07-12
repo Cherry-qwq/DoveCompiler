@@ -8,13 +8,13 @@ namespace config
 {
   struct Config
   {
-    std::string srcFilePath;
-    std::string dstFilePath;
+    std::string src_file_path;
+    std::string dst_file_path;
     friend std::ostream &operator<<(std::ostream &os, const Config &c)
     {
       os << "Configure : {" << std::endl;
-      os << "\tsrcFilePath : " << c.srcFilePath << std::endl;
-      os << "\tdstFilePath : " << c.dstFilePath << std::endl;
+      os << "\tsrcFilePath : " << c.src_file_path << std::endl;
+      os << "\tdstFilePath : " << c.dst_file_path << std::endl;
       os << "}" << std::endl;
       return os;
     }

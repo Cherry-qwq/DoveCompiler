@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <string>
 
+#include "DumpHelper.h"
 #include "Type.h"
 
 namespace ir
@@ -17,7 +18,7 @@ namespace ir
 
   public:
     Value(std::unique_ptr<Type> type, std::string name) : type_(std::move(type)), name_(std::move(name)) {}
-    virtual std::string dump() const = 0;
+    virtual std::string dump(DumpHelper &helper) const = 0;
     bool bindUse(Use *use)
     {
       if (uses_.count(use))

@@ -10,24 +10,24 @@ namespace config
 	Config &init(int argc, char **argv)
 	{
 		up = std::make_unique<Config>();
-		auto argParser = argparse::ArgumentParser(CONSTANTS::program_name);
-		argParser.add_argument("srcFilePath")
+		auto arg_parser = argparse::ArgumentParser(CONSTANTS::kProgramName);
+		arg_parser.add_argument("srcFilePath")
 				.help("Source File.")
 				.required();
-		argParser.add_argument("-o")
+		arg_parser.add_argument("-o")
 				.help("Compiled File Destination.")
 				.required();
 
 		try
 		{
-			argParser.parse_args(argc, argv);
-			up->srcFilePath = argParser.get("srcFilePath");
-			up->dstFilePath = argParser.get("-o");
+			arg_parser.parse_args(argc, argv);
+			up->src_file_path = arg_parser.get("srcFilePath");
+			up->dst_file_path = arg_parser.get("-o");
 		}
 		catch (const std::runtime_error &err)
 		{
 			std::cerr << err.what() << std::endl;
-			std::cerr << argParser << std::endl;
+			std::cerr << arg_parser << std::endl;
 			std::exit(1);
 		}
 		return *up;

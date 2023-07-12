@@ -11,16 +11,16 @@ int main(int argc, char *argv[])
 	std::cout << config::get() << std::endl;
 
 	auto source = std::ifstream();
-	source.open(config::get().srcFilePath);
+	source.open(config::get().src_file_path);
 	antlr4::ANTLRInputStream input(source);
-	front::SysYLexer mLexer(&input);
-	antlr4::CommonTokenStream tokens(&mLexer);
-	front::SysYParser mParser(&tokens);
-	mParser.setErrorHandler(std::make_shared<antlr4::BailErrorStrategy>());
-	front::SysYParser::CompUnitContext *root = mParser.compUnit();
+	front::SysYLexer m_lexer(&input);
+	antlr4::CommonTokenStream tokens(&m_lexer);
+	front::SysYParser m_parser(&tokens);
+	m_parser.setErrorHandler(std::make_shared<antlr4::BailErrorStrategy>());
+	front::SysYParser::CompUnitContext *root = m_parser.compUnit();
 
 	//	front : ast => ir
-	auto Visitor = front::VisitorImpl();
+	auto visitor = front::VisitorImpl();
 	// auto r = std::any_cast<std::shared_ptr<ir::CompUnitSsa>>(root->accept(&astVisitor));
 	// auto dh = mir::DumpHelper();
 	// println(r->dump(dh));

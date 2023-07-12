@@ -15,7 +15,7 @@ namespace ir
   {
   public:
     explicit Constant(uint32_t val) : User(MakePrimitiveDataType(PrimitiveDataType::TypeID::Int32), "Constant"), val_(val) {}
-    std::string dump() const override
+    std::string dump(DumpHelper &helper) const override
     {
       return std::to_string(val_);
     }
@@ -29,7 +29,7 @@ namespace ir
   {
   public:
     Allocate(std::unique_ptr<Type> type, std::string name) : User(MakePointerType(copyType(type)), std::move(name)), type_(std::move(type)) {}
-    std::string dump() const override
+    std::string dump(DumpHelper &helper) const override
     {
       return "Allocate " + getName() + " " + getType()->dump();
     }

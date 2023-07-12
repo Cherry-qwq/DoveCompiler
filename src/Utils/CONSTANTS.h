@@ -3,5 +3,5 @@
 #include <string>
 
 namespace CONSTANTS {
-  const std::string program_name="DoveCompiler";
+  const std::string kProgramName="DoveCompiler";
 }
