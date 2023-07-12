@@ -11,27 +11,28 @@
   用于储存IR中的单个值
   
   #### Constructors
-  `Constant(uint32_t val)`
+  - `Constant(uint32_t val)`
   #### Methods
+  - null
   #### Extended Methods
-  `std::string dump()`
+  - `std::string dump()`
 
 
 
   
 
-### `Allocate`
+### `ir::Allocate`
 
   用于开拓内存空间，并指示类型
 
-### `Load`
+### `ir::Load`
   
 
 
-### `Store`
+### `ir::Store`
 
 BasicBlock
-### `Return`
+### `ir::Return`
 
 
-### `Phi`
+### `ir::Phi`
