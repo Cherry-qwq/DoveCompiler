@@ -22,7 +22,9 @@
   用于开拓内存空间，并指示类型
 
 #### `ir::Load`
-  
+
+#### `ir::Store`
+
 # ConrtrolFlow.h
 
 - [ ] `ir::Function`
@@ -30,7 +32,7 @@
 - [ ] `ir::Return`
 - [ ] `ir::Phi`
 
-#### `ir::Store`
+
 
 #### `ir::Function`
 
