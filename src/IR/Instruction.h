@@ -3,10 +3,10 @@
 #include <memory>
 
 #include "User.h"
-#include "BasicBlock.h"
 
 namespace ir
 {
+  class BasicBlock;
   class Instruction : public User
   {
   public:

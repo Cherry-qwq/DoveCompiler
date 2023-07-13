@@ -53,16 +53,11 @@ namespace front
     bool is_global_ = false;
   };
 
-  class SymbolTable
+  class SymbolTable: public std::enable_shared_from_this<SymbolTable>
   {
   public:
     SymbolTable() = default;
     ~SymbolTable() = default;
-
-    std::shared_ptr<SymbolTable> get()
-    {
-      return std::shared_ptr<SymbolTable>(this);
-    };
 
     void addSymbolToCurrentScope(const std::string &name, const std::shared_ptr<ir::Allocate> &symbol);
 

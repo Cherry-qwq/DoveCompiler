@@ -51,7 +51,7 @@ namespace front
 
     void SymbolTable::pushScope(const std::string &name = std::string("anonymous"))
     {
-      auto scope = std::make_shared<Scope>(name,get());
+      auto scope = std::make_shared<Scope>(name,shared_from_this());
       if (scopes_.empty())
       {
         scopes_.push(scope);

@@ -21,9 +21,9 @@ int main(int argc, char *argv[])
 
 	//	front : ast => ir
 	auto visitor = front::VisitorImpl();
-	// auto r = std::any_cast<std::shared_ptr<ir::CompUnitSsa>>(root->accept(&astVisitor));
-	// auto dh = mir::DumpHelper();
-	// println(r->dump(dh));
+	auto irp = std::any_cast<std::shared_ptr<ir::CompUnit>>(root->accept(&visitor));
+	auto dh = ir::DumpHelper();
+	std::cout<<irp->dump(dh);
 
 	std::cout << "Bye" << std::endl;
 	return 0;

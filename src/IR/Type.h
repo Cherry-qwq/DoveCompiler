@@ -31,7 +31,7 @@ namespace ir
     PrimitiveDataType(TypeID id) : type_(id) {}
     std::unique_ptr<Type> get() const
     {
-      return nullptr;
+      return std::make_unique<PrimitiveDataType>(type_);
     }
     std::unique_ptr<Type> copy() const
     {
@@ -42,13 +42,13 @@ namespace ir
       switch (type_)
       {
       case TypeID::Int32:
-        return "Int32";
+        return "T(Int32)";
       case TypeID::Float32:
-        return "Float32";
+        return "T(Float32)";
       case TypeID::Boolean:
-        return "Boolean";
+        return "T(Boolean)";
       case TypeID::Void:
-        return "Void";
+        return "T(Void)";
       default:
         return "Unknown";
       }
@@ -68,9 +68,9 @@ namespace ir
     {
       return ref_->get();
     }
-    std::unique_ptr<Type> copy() const
+    std::unique_ptr<PointerType> copy() const
     {
-      return std::make_unique<PointerType>(ref_->copy());
+      return std::unique_ptr<PointerType>(std::make_unique<PointerType>(ref_->copy()));
     }
     std::string dump()
     {

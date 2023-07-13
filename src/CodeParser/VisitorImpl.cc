@@ -8,7 +8,7 @@ namespace front
 
   std::any VisitorImpl::visitCompUnit(SysYParser::CompUnitContext *context)
   {
-    ctx_.compUnit = std::make_shared<ir::CompUnit>();
+    ctx_.compUnit = std::make_shared<ir::CompUnit>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void),"compUnit");
     for(auto decl : context->decl())
     {
       //TODO

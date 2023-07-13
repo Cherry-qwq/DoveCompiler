@@ -7,7 +7,7 @@
 
 namespace ir
 {
-  class BasicBlock : public Value
+  class BasicBlock : public Value, std::enable_shared_from_this<BasicBlock>
   {
   public:
     explicit BasicBlock(std::string name) : Value(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name)){};
@@ -23,7 +23,7 @@ namespace ir
     
     void addInstruction(std::shared_ptr<Instruction> inst)
     {
-      inst->setParent(std::make_shared<BasicBlock>(*this));
+      inst->setParent(shared_from_this());
       instructions_.push_back(std::move(inst));
     };
 
