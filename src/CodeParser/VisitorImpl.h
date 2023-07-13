@@ -9,6 +9,7 @@
 #include <SysYVisitor.h>
 
 #include "SymbolTable.h"
+#include "IR/BasicBlock.h"
 #include "IR/ControlFlow.h"
 
 namespace front
@@ -17,7 +18,17 @@ namespace front
   class Context{
   public:
     SymbolTable symbolTable;
+    
     std::shared_ptr<ir::CompUnit> compUnit;
+    std::shared_ptr<ir::Function> currentFunction;
+
+    std::vector<std::shared_ptr<ir::Allocate>> currentAllocates;
+
+    std::shared_ptr<ir::BasicBlock> entryBasicBlock;
+    std::shared_ptr<ir::BasicBlock> currentBasicBlock;
+    std::shared_ptr<ir::BasicBlock> exitBasicBlock;
+    
+    std::shared_ptr<ir::Allocate> returnAllocate;
   };
 
   class VisitorImpl : public SysYVisitor

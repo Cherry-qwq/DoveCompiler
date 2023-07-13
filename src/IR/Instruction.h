@@ -17,9 +17,6 @@ namespace ir
       
     void setParent(std::shared_ptr<BasicBlock> parent) { parent_ = parent; };
     std::shared_ptr<BasicBlock> getParent() { return parent_; };
-    void removeFromParent() { 
-      //TODO
-    };
   protected:
     unsigned numOps_;
     std::shared_ptr<BasicBlock> parent_;

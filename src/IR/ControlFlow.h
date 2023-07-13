@@ -3,18 +3,27 @@
 #include <memory>
 #include <string>
 
-#include "Type.h"
-#include "Value.h"
 #include "User.h"
 
 namespace ir
 {
 
-  class CompUnit : public User{
+  class CompUnit : public User
+  {
     //TODO
   };
 
   class Function : public User
+  {
+    // TODO
+  };
+
+  class Icmp : public User
+  {
+    // TODO
+  };
+
+  class Branch : public User
   {
     // TODO
   };

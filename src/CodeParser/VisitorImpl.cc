@@ -1,12 +1,23 @@
+
 #include "VisitorImpl.h"
+
+#include "Utils/Utils.h"
 
 namespace front
 {
 
   std::any VisitorImpl::visitCompUnit(SysYParser::CompUnitContext *context)
   {
-    // TODO
-    return 0;
+    ctx_.compUnit = std::make_shared<ir::CompUnit>();
+    for(auto decl : context->decl())
+    {
+      //TODO
+    }
+    for(auto funcDef : context->funcDef())
+    {
+      funcDef->accept(this);
+    }
+    return ctx_.compUnit;
   };
   std::any VisitorImpl::visitDecl(SysYParser::DeclContext *context)
   {
