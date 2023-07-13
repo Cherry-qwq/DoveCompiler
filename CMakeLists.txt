@@ -45,6 +45,7 @@ target_link_libraries(DoveCompiler PUBLIC ${CONAN_LIBS})
 target_include_directories(DoveCompiler PUBLIC
 	includes/deps
 	includes/generated
+	src/
 )
 
 

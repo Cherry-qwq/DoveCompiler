@@ -5,7 +5,6 @@
 #include <utility>
 #include <string>
 
-#include "Type.h"
 #include "TypeFactory.h"
 #include "User.h"
 
@@ -28,7 +27,7 @@ namespace ir
   class Allocate : public User
   {
   public:
-    Allocate(std::unique_ptr<Type> type, std::string name) : User(MakePointerType(copyType(type)), std::move(name)), type_(std::move(type)) {}
+    Allocate(std::unique_ptr<Type> type, std::string name) : User(MakePointerType(type->copy()), std::move(name)), type_(std::move(type)) {}
     std::string dump(DumpHelper &helper) const override
     {
       return "Allocate " + getName() + " " + getType()->dump();

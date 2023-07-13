@@ -2,11 +2,10 @@
 
 #include <memory>
 
-#include "Value.h"
-#include "User.h"
-
 namespace ir
 {
+  class Value;
+  class User;
   class Use
   {
   public:

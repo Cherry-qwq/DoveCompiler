@@ -5,8 +5,9 @@
 #include <algorithm>
 #include <string>
 
-#include "DumpHelper.h"
+#include "Use.h"
 #include "Type.h"
+#include "DumpHelper.h"
 
 namespace ir
 {

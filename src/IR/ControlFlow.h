@@ -10,9 +10,8 @@
 namespace ir
 {
 
-  class BasicBlock : public Value
-  {
-    // TODO
+  class CompUnit : public User{
+    //TODO
   };
 
   class Function : public User

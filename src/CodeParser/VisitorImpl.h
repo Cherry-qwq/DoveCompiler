@@ -2,14 +2,23 @@
 
 #include <cstdint>
 #include <variant>
+#include <memory>
+
 #include <antlr4-runtime.h>
 #include <SysYParser.h>
 #include <SysYVisitor.h>
 
+#include "SymbolTable.h"
+#include "IR/ControlFlow.h"
+
 namespace front
 {
 
-  class Context{};
+  class Context{
+  public:
+    SymbolTable symbolTable;
+    std::shared_ptr<ir::CompUnit> compUnit;
+  };
 
   class VisitorImpl : public SysYVisitor
   {

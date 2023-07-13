@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 
-#include "Use.h"
 #include "Value.h"
 
 namespace ir
