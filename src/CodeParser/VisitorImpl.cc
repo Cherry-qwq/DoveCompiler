@@ -8,20 +8,26 @@ namespace front
 
   std::any VisitorImpl::visitCompUnit(SysYParser::CompUnitContext *context)
   {
-    ctx_.compUnit = std::make_shared<ir::CompUnit>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void),"compUnit");
-    for(auto decl : context->decl())
-    {
-      //TODO
-    }
-    for(auto funcDef : context->funcDef())
-    {
-      funcDef->accept(this);
-    }
+    ctx_.symbolTable->pushScope("global");
+    ctx_.compUnit = std::make_shared<ir::CompUnit>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), "compUnit");
+    // for (auto decl : context->decl())
+    // {
+    //   decl->accept(this);
+    // }
+    // for (auto funcDef : context->funcDef())
+    // {
+    //   funcDef->accept(this);
+    // }
     return ctx_.compUnit;
   };
   std::any VisitorImpl::visitDecl(SysYParser::DeclContext *context)
   {
-    // TODO
+    if (ctx_.symbolTable->getCurrentScope()->isGlobal())
+    {
+    }
+    else
+    {
+    }
     return 0;
   };
   std::any VisitorImpl::visitConstDecl(SysYParser::ConstDeclContext *context)
@@ -65,8 +71,21 @@ namespace front
     return 0;
   };
   std::any VisitorImpl::visitFuncDef(SysYParser::FuncDefContext *context)
-  { // TODO
-    return 0;
+  {
+    ctx_.currentFunction = std::make_shared<ir::Function>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), context->Identifier()->getSymbol()->getText());
+    ctx_.compUnit->addGlobalObject(ctx_.currentFunction);
+    ctx_.symbolTable->pushScope("function");
+    for (auto funcFparam : context->funcFparamList()->funcFparam())
+    {
+      funcFparam->accept(this);
+    }
+    for (auto blockItem : context->block()->blockItem())
+    {
+      blockItem->accept(this);
+    }
+    ctx_.symbolTable->popScope();
+
+    return ctx_.currentFunction;
   };
   std::any VisitorImpl::visitFuncType(SysYParser::FuncTypeContext *context)
   { // TODO
@@ -245,5 +264,4 @@ namespace front
   { // TODO
     return 0;
   };
-
 }

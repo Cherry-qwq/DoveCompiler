@@ -17,7 +17,7 @@ namespace front
 
   class Context{
   public:
-    SymbolTable symbolTable;
+    std::shared_ptr<SymbolTable> symbolTable = std::make_shared<SymbolTable>();
     
     std::shared_ptr<ir::CompUnit> compUnit;
     std::shared_ptr<ir::Function> currentFunction;
@@ -94,6 +94,6 @@ namespace front
     std::any visitChildren(antlr4::tree::ParseTree *node) override;
 
   protected:
-    Context ctx_;
+    Context ctx_ = Context();
   };
 }
