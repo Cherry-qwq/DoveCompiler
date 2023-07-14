@@ -23,7 +23,8 @@ int main(int argc, char *argv[])
 	auto visitor = front::VisitorImpl();
 	auto irp = std::any_cast<std::shared_ptr<ir::CompUnit>>(root->accept(&visitor));
 	auto dh = ir::DumpHelper();
-	std::cout<<irp->dump(dh);
+	std::string output = irp->dump(dh);
+	std::cout<<output<<std::endl;
 
 	std::cout << "Bye" << std::endl;
 	return 0;

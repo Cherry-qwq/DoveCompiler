@@ -10,14 +10,14 @@ namespace front
   {
     ctx_.symbolTable->pushScope("global");
     ctx_.compUnit = std::make_shared<ir::CompUnit>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), "compUnit");
-    // for (auto decl : context->decl())
-    // {
-    //   decl->accept(this);
-    // }
-    // for (auto funcDef : context->funcDef())
-    // {
-    //   funcDef->accept(this);
-    // }
+    for (auto decl : context->decl())
+    {
+      decl->accept(this);
+    }
+    for (auto funcDef : context->funcDef())
+    {
+      funcDef->accept(this);
+    }
     return ctx_.compUnit;
   };
   std::any VisitorImpl::visitDecl(SysYParser::DeclContext *context)
@@ -75,10 +75,7 @@ namespace front
     ctx_.currentFunction = std::make_shared<ir::Function>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), context->Identifier()->getSymbol()->getText());
     ctx_.compUnit->addGlobalObject(ctx_.currentFunction);
     ctx_.symbolTable->pushScope("function");
-    for (auto funcFparam : context->funcFparamList()->funcFparam())
-    {
-      funcFparam->accept(this);
-    }
+    // context->funcFparamList()->accept(this);
     for (auto blockItem : context->block()->blockItem())
     {
       blockItem->accept(this);

@@ -6,7 +6,7 @@
 #include <string>
 
 #include "TypeFactory.h"
-#include "User.h"
+#include "GlobalObject.h"
 
 namespace ir
 {
@@ -24,10 +24,24 @@ namespace ir
     uint32_t val_ = 0;
   };
 
+
+  class GlobalVariable : public GlobalObject
+  {
+  public:
+    GlobalVariable(std::unique_ptr<Type> type, std::string name) : GlobalObject(MakePointerType(type->copy()), std::move(name)), type_(std::move(type)){};
+    std::string dump(DumpHelper &helper) const override
+    {
+      return "GlobalVariable " + getName() + " " + getType()->dump();
+    }
+
+  protected:
+    std::unique_ptr<Type> type_;
+  };
+
   class Allocate : public User
   {
   public:
-    Allocate(std::unique_ptr<Type> type, std::string name) : User(MakePointerType(type->copy()), std::move(name)), type_(std::move(type)) {}
+    Allocate(std::unique_ptr<Type> type, std::string name) : User(MakePointerType(type->copy()), std::move(name)), type_(std::move(type)){};
     std::string dump(DumpHelper &helper) const override
     {
       return "Allocate " + getName() + " " + getType()->dump();
@@ -39,13 +53,12 @@ namespace ir
 
   class Load : public User
   {
-    //TODO
+    // TODO
   };
 
   class Store : public User
   {
-    //TODO
+    // TODO
   };
-
 
 }

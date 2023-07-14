@@ -15,6 +15,7 @@ add_compile_options(
 	-Wno-unused-variable
 	-Wno-unknown-pragmas
 	-std=gnu++17
+	# -fsanitize=address
 )
 
 add_link_options(-lpthread -lm -v -pthread)

@@ -2,12 +2,12 @@
 
 namespace front
 {
-  void SymbolTable::addSymbolToCurrentScope(const std::string &name, const std::shared_ptr<ir::Allocate> &symbol)
+  void SymbolTable::addSymbolToCurrentScope(const std::string &name, const std::shared_ptr<Symbol> &symbol)
   {
     scopes_.top()->addSymbol(name, symbol);
   };
 
-  void SymbolTable::addSymbolToGlobalScope(const std::string &name, const std::shared_ptr<ir::Allocate> &symbol)
+  void SymbolTable::addSymbolToGlobalScope(const std::string &name, const std::shared_ptr<Symbol> &symbol)
   {
     auto now_scope = scopes_.top();
     while (!now_scope->isGlobal())
@@ -32,7 +32,7 @@ namespace front
     return true;
   }
 
-  std::optional<std::reference_wrapper<std::shared_ptr<ir::Allocate>>> SymbolTable::getSymbol(const std::string &name, bool recursive = true)
+  std::optional<std::reference_wrapper<std::shared_ptr<Symbol>>> SymbolTable::getSymbol(const std::string &name, bool recursive = true)
   {
     auto now_scope = scopes_.top();
     while (true)

@@ -34,10 +34,10 @@ namespace ir
       return std::make_shared<std::vector<std::shared_ptr<GlobalObject>>>(global_objects_);
     }
 
-    bool isConstant() const override
-    {
-      return false;
-    }
+    // bool isConstant() const override
+    // {
+    //   return false;
+    // }
     
   protected:
     std::vector<std::shared_ptr<GlobalObject>> global_objects_;
@@ -68,10 +68,10 @@ namespace ir
       return std::make_shared<std::vector<std::shared_ptr<BasicBlock>>>(basic_blocks_);
     }
 
-    bool isConstant() const override
-    {
-      return false;
-    }
+    // bool isConstant() const override
+    // {
+    //   return false;
+    // }
 
   protected:
     std::vector<std::shared_ptr<BasicBlock>> basic_blocks_;
