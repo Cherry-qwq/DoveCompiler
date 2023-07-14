@@ -38,8 +38,8 @@ namespace ir
       return true;
     }
 
-    virtual Value & setName(std::string name) { name_ = std::move(name); return *this; }
-    virtual std::string getName() const { return name_; }
+    Value & setName(std::string name) { name_ = std::move(name); return *this; }
+    std::string getName() const { return name_; }
 
     std::unique_ptr<Type> getType() const { return type_->copy(); }
 
