@@ -6,6 +6,7 @@
 #include <string>
 
 #include "TypeFactory.h"
+#include "Instruction.h"
 #include "GlobalObject.h"
 
 namespace ir
@@ -25,38 +26,38 @@ namespace ir
   };
 
 
-  class GlobalVariable : public GlobalObject
+  class GlobalAllocate : public GlobalObject
   {
   public:
-    GlobalVariable(std::unique_ptr<Type> type, std::string name) : GlobalObject(MakePointerType(type->copy()), std::move(name)), type_(std::move(type)){};
+    GlobalAllocate(std::shared_ptr<Type> type, std::string name) : GlobalObject(MakePointerType(type->copy()), std::move(name)), type_(std::move(type)){};
     std::string dump(DumpHelper &helper) const override
     {
       return "GlobalVariable " + getName() + " " + getType()->dump();
     }
 
   protected:
-    std::unique_ptr<Type> type_;
+    std::shared_ptr<Type> type_;
   };
 
   class Allocate : public User
   {
   public:
-    Allocate(std::unique_ptr<Type> type, std::string name) : User(MakePointerType(type->copy()), std::move(name)), type_(std::move(type)){};
+    Allocate(std::shared_ptr<Type> type, std::string name) : User(MakePointerType(type->copy()), std::move(name)), type_(std::move(type)){};
     std::string dump(DumpHelper &helper) const override
     {
       return "Allocate " + getName() + " " + getType()->dump();
     }
 
   protected:
-    std::unique_ptr<Type> type_;
+    std::shared_ptr<Type> type_;
   };
 
-  class Load : public User
+  class Load : public Instruction
   {
     // TODO
   };
 
-  class Store : public User
+  class Store : public Instruction
   {
     // TODO
   };

@@ -5,21 +5,20 @@
 
 namespace ir
 {
-  std::unique_ptr<PrimitiveDataType> MakePrimitiveDataType(PrimitiveDataType::TypeID id)
+  std::shared_ptr<PrimitiveDataType> MakePrimitiveDataType(PrimitiveDataType::TypeID id)
   {
-    return std::make_unique<PrimitiveDataType>(id);
+    return std::make_shared<PrimitiveDataType>(id);
   }
 
-  std::unique_ptr<PointerType> MakePointerType(std::unique_ptr<Type> ref)
+  std::shared_ptr<PointerType> MakePointerType(std::shared_ptr<Type> ref)
   {
-    return std::make_unique<PointerType>(std::move(ref));
+    return std::make_shared<PointerType>(ref);
   }
 
-  std::unique_ptr<Type> MakeType(std::unique_ptr<Type> ptr)
+  std::shared_ptr<Type> MakeType(std::shared_ptr<Type> ptr)
   {
     // moe_assert(dynamic_cast<PointerType *>(pointer.get()));
-    auto p = std::unique_ptr<PointerType>(dynamic_cast<PointerType *>(ptr.release()));
-    return p->get();
+    return ptr->get();
   }
 
 }

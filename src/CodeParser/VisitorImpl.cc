@@ -17,6 +17,7 @@ namespace front
     for (auto funcDef : context->funcDef())
     {
       funcDef->accept(this);
+      ctx_.compUnit->addGlobalObject(ctx_.currentFunction);
     }
     return ctx_.compUnit;
   };
@@ -35,7 +36,17 @@ namespace front
     return 0;
   };
   std::any VisitorImpl::visitBType(SysYParser::BTypeContext *context)
-  { // TODO
+  { 
+    ir::PrimitiveDataType::TypeID typeID = ir::PrimitiveDataType::TypeID::Int32;
+    if (context->Int())
+    {
+      typeID = ir::PrimitiveDataType::TypeID::Int32;
+    }
+    else if (context->Float())
+    {
+      typeID = ir::PrimitiveDataType::TypeID::Float32;
+    }
+    return typeID;
     return 0;
   };
   std::any VisitorImpl::visitConstDef(SysYParser::ConstDefContext *context)
@@ -72,21 +83,34 @@ namespace front
   };
   std::any VisitorImpl::visitFuncDef(SysYParser::FuncDefContext *context)
   {
-    ctx_.currentFunction = std::make_shared<ir::Function>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), context->Identifier()->getSymbol()->getText());
-    ctx_.compUnit->addGlobalObject(ctx_.currentFunction);
+    ir::PrimitiveDataType::TypeID typeID = std::any_cast<ir::PrimitiveDataType::TypeID>(context->funcType()->accept(this));
+    ctx_.currentFunction = std::make_shared<ir::Function>(ir::MakePrimitiveDataType(typeID), context->Identifier()->getSymbol()->getText());
     ctx_.symbolTable->pushScope("function");
-    // context->funcFparamList()->accept(this);
+
     for (auto blockItem : context->block()->blockItem())
     {
       blockItem->accept(this);
     }
-    ctx_.symbolTable->popScope();
 
+    ctx_.symbolTable->popScope();
     return ctx_.currentFunction;
   };
   std::any VisitorImpl::visitFuncType(SysYParser::FuncTypeContext *context)
-  { // TODO
-    return 0;
+  {
+    ir::PrimitiveDataType::TypeID typeID = ir::PrimitiveDataType::TypeID::Void;
+    if (context->Void())
+    {
+      typeID = ir::PrimitiveDataType::TypeID::Void;
+    }
+    else if (context->Int())
+    {
+      typeID = ir::PrimitiveDataType::TypeID::Int32;
+    }
+    else if (context->Float())
+    {
+      typeID = ir::PrimitiveDataType::TypeID::Float32;
+    }
+    return typeID;
   };
   std::any VisitorImpl::visitFuncFparamList(SysYParser::FuncFparamListContext *context)
   { // TODO

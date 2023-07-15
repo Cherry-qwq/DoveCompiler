@@ -5,15 +5,12 @@
 
 namespace ir
 {
-  class Type
+  class Type : std::enable_shared_from_this<Type>
   {
   public:
     virtual ~Type() = default;
-    virtual std::unique_ptr<Type> get() const = 0;
-    virtual std::unique_ptr<Type> copy()
-    {
-      return std::unique_ptr<Type>(this);
-    };
+    virtual std::shared_ptr<Type> get() const = 0;
+    virtual std::shared_ptr<Type> copy() const =0;
     virtual std::string dump() = 0;
   };
 
@@ -29,26 +26,26 @@ namespace ir
     };
 
     PrimitiveDataType(TypeID id) : type_(id) {}
-    std::unique_ptr<Type> get() const
+    std::shared_ptr<Type> get() const
     {
-      return std::make_unique<PrimitiveDataType>(type_);
+      return std::make_shared<PrimitiveDataType>(type_);
     }
-    std::unique_ptr<Type> copy() const
+    std::shared_ptr<Type> copy() const
     {
-      return std::make_unique<PrimitiveDataType>(type_);
+      return std::make_shared<PrimitiveDataType>(type_);
     }
     std::string dump()
     {
       switch (type_)
       {
       case TypeID::Int32:
-        return "T(Int32)";
+        return "Int32";
       case TypeID::Float32:
-        return "T(Float32)";
+        return "Float32";
       case TypeID::Boolean:
-        return "T(Boolean)";
+        return "Boolean";
       case TypeID::Void:
-        return "T(Void)";
+        return "Void";
       default:
         return "Unknown";
       }
@@ -57,20 +54,20 @@ namespace ir
   protected:
     TypeID type_;
   };
-  std::unique_ptr<PrimitiveDataType> MakePrimitiveDataType(PrimitiveDataType::TypeID id);
+  std::shared_ptr<PrimitiveDataType> MakePrimitiveDataType(PrimitiveDataType::TypeID id);
 
   class PointerType : public Type
   {
   public:
-    explicit PointerType(std::unique_ptr<Type> ref) : ref_(std::move(ref)) {}
+    explicit PointerType(std::shared_ptr<Type> ref) : ref_(std::move(ref)) {}
     PointerType(const PointerType &other) : ref_(other.ref_->get()) {}
-    std::unique_ptr<Type> get() const
+    std::shared_ptr<Type> get() const
     {
       return ref_->get();
     }
-    std::unique_ptr<PointerType> copy() const
+    std::shared_ptr<Type> copy() const
     {
-      return std::unique_ptr<PointerType>(std::make_unique<PointerType>(ref_->copy()));
+      return std::make_shared<PointerType>(std::make_shared<PointerType>(ref_->copy()));
     }
     std::string dump()
     {
@@ -78,9 +75,9 @@ namespace ir
     }
 
   protected:
-    std::unique_ptr<Type> ref_;
+    std::shared_ptr<Type> ref_;
   };
-  std::unique_ptr<PointerType> MakePointerType(std::unique_ptr<Type> ref);
+  std::shared_ptr<PointerType> MakePointerType(std::shared_ptr<Type> ref);
 
-  std::unique_ptr<Type> MakeType(std::unique_ptr<Type> ptr);
+  std::shared_ptr<Type> MakeType(std::shared_ptr<Type> ptr);
 }

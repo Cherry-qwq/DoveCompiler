@@ -12,7 +12,7 @@ namespace ir
   class CompUnit : public User
   {
   public:
-    CompUnit(std::unique_ptr<Type> type, std::string name)
+    CompUnit(std::shared_ptr<Type> type, std::string name)
         : User(std::move(type), name){};
     std::string dump(DumpHelper &helper) const override
     {
@@ -46,11 +46,11 @@ namespace ir
   class Function : public GlobalObject
   {
   public:
-    Function(std::unique_ptr<Type> type, std::string name)
+    Function(std::shared_ptr<Type> type, std::string name)
         : GlobalObject(std::move(type), std::move(name)){};
     std::string dump(DumpHelper &helper) const override
     {
-      std::string output = "Function " + getName() + " ";
+      std::string output = "Function " + getName() + ": " + getType()->dump();
       for(auto basic_block : basic_blocks_)
       {
         output += "\n\t" + basic_block->dump(helper);

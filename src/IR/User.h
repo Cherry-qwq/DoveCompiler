@@ -11,6 +11,6 @@ namespace ir
   class User : public Value
   {
   public:
-    explicit User(std::unique_ptr<Type> type, std::string name = "") : Value(std::move(type), std::move(name)){};
+    explicit User(std::shared_ptr<Type> type, std::string name = "") : Value(type, name){};
   };
 }
