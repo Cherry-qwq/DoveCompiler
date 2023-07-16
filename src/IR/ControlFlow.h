@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 
-#include "User.h"
+#include "Instruction.h"
 namespace ir
 {
 
@@ -82,34 +82,43 @@ namespace ir
   public:
     Branch(std::shared_ptr<Value> condition, std::string name)
         : User(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name)), condition_(condition, this){};
-    void setCmpResult(std::shared_ptr<Value> condition)
+    std::string dump(DumpHelper &helper) const override
+    {
+      std::string output = "Branch " + getName() + " ";
+      helper.add(output);
+      helper.indent();
+      helper.add(condition_.getValue()->dump(helper));
+      helper.unindent();
+      return output;
+    }
+    void setCondition(std::shared_ptr<Value> condition)
     {
       condition_ = Use(condition, this);
     }
-    std::shared_ptr<Value> getCmpResult()
+    std::shared_ptr<Value> getCondition()
     {
       return condition_.getValue();
     }
-    void setTrueBranch(std::shared_ptr<BasicBlock> true_branch)
+    void setTrueTarget(std::shared_ptr<BasicBlock> true_target)
     {
-      true_branch_ = true_branch;
+      true_target_ = true_target;
     }
-    std::shared_ptr<BasicBlock> getTrueBranch(std::shared_ptr<BasicBlock> true_branch)
+    std::shared_ptr<BasicBlock> getTrueTarget(std::shared_ptr<BasicBlock> true_target)
     {
-      return true_branch_;
+      return true_target_;
     }
-    void setFalseBranch(std::shared_ptr<BasicBlock> false_branch)
+    void setFalseTarget(std::shared_ptr<BasicBlock> false_target)
     {
-      false_branch_ = false_branch;
+      false_target_ = false_target;
     }
-    std::shared_ptr<BasicBlock> getFalseBranch(std::shared_ptr<BasicBlock> false_branch)
+    std::shared_ptr<BasicBlock> getFalseTarget(std::shared_ptr<BasicBlock> false_target)
     {
-      return false_branch_;
+      return false_target_;
     }
 
   protected:
-    std::shared_ptr<BasicBlock> true_branch_;
-    std::shared_ptr<BasicBlock> false_branch_;
+    std::shared_ptr<BasicBlock> true_target_;
+    std::shared_ptr<BasicBlock> false_target_;
     Use condition_;
   };
 
@@ -131,17 +140,17 @@ namespace ir
     std::shared_ptr<BasicBlock> target_;
   };
 
-  class Return : public User
+  class Return : public Instruction
   {
   public:
     Return(std::shared_ptr<Value> retVal, std::string name)
-        : User(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name)), ret_val_(retVal, this){};
+        : Instruction(std::move(retVal->getType()), std::move(name), 1), ret_val_(retVal, this){};
 
   protected:
     Use ret_val_;
   };
 
-  class Phi : public User
+  class Phi : public Instruction
   {
     // TODO
   };
