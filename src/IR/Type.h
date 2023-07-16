@@ -71,7 +71,7 @@ namespace ir
     }
     std::string dump()
     {
-      return "Pointer(" + ref_->dump() + ")";
+      return "" + ref_->dump() + "*";
     }
 
   protected:
