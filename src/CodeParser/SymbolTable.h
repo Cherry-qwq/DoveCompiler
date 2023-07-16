@@ -17,7 +17,7 @@ namespace front
   {
   public:
     Symbol(const Symbol &symbol) = default;
-    Symbol(std::string &name, std::shared_ptr<ir::Allocate> symbol)
+    Symbol(const std::string &name, std::shared_ptr<ir::Allocate> symbol)
         : name_(name), allocate_(symbol){};
     ~Symbol() = default;
 

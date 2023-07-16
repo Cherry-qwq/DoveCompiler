@@ -68,5 +68,6 @@
     "shared_mutex": "cpp",
     "stop_token": "cpp",
     "thread": "cpp"
-  }
+  },
+  "cmake.configureOnOpen": true
 }

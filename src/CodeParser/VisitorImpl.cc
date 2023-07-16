@@ -10,9 +10,16 @@ namespace front
   {
     ctx_.symbolTable->pushScope("global");
     ctx_.compUnit = std::make_shared<ir::CompUnit>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), "compUnit");
+    
     for (auto decl : context->decl())
     {
-      decl->accept(this);
+      std::vector<std::shared_ptr<ir::Allocate>> allocates;
+      allocates = std::any_cast<std::vector<std::shared_ptr<ir::Allocate>>>(decl->accept(this));
+      //allocates=decl->accept(this);
+      for(auto allo : allocates){
+          std::shared_ptr<Symbol> sym = std::make_shared<Symbol>(allo->getName(), allo);
+          ctx_.symbolTable->addSymbolToGlobalScope(allo->getName(), sym);
+      }
     }
     for (auto funcDef : context->funcDef())
     {
@@ -26,11 +33,11 @@ namespace front
     std::vector<std::shared_ptr<ir::Allocate>> allocates;
     if (context->constDecl())
     {
-      allocates=std::any_cast<std::vector<std::shared_ptr<ir::Allocate>>>(context->constDecl()->accept(this));
+      allocates = std::any_cast<std::vector<std::shared_ptr<ir::Allocate>>>(context->constDecl()->accept(this));
     }
     else if (context->varDecl())
     {
-      allocates=std::any_cast<std::vector<std::shared_ptr<ir::Allocate>>>(context->varDecl()->accept(this));
+      allocates = std::any_cast<std::vector<std::shared_ptr<ir::Allocate>>>(context->varDecl()->accept(this));
     }
     return allocates;
   };
@@ -66,16 +73,15 @@ namespace front
   };
   std::any VisitorImpl::visitVarDecl(SysYParser::VarDeclContext *context)
   {
-    ir::PrimitiveDataType::TypeID typeID =std::any_cast<ir::PrimitiveDataType::TypeID>(context->bType()->accept(this));
+    ir::PrimitiveDataType::TypeID typeID = std::any_cast<ir::PrimitiveDataType::TypeID>(context->bType()->accept(this));
     std::vector<std::shared_ptr<ir::Allocate>> allocates;
     for (auto varDef : context->varDef())
     {
-      std::shared_ptr<ir::Allocate> a=std::any_cast<std::shared_ptr<ir::Allocate>> (varDef->accept(this));
+      std::shared_ptr<ir::Allocate> a = std::any_cast<std::shared_ptr<ir::Allocate>>(varDef->accept(this));
       a->setType(ir::MakePrimitiveDataType(typeID));
       allocates.push_back(a);
     }
     return allocates;
-
   };
   std::any VisitorImpl::visitUnInitVarDef(SysYParser::UnInitVarDefContext *context)
   {
