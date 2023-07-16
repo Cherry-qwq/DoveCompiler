@@ -59,7 +59,7 @@ namespace ir
   class PointerType : public Type
   {
   public:
-    explicit PointerType(std::shared_ptr<Type> ref) : ref_(std::move(ref)) {}
+    explicit PointerType(std::shared_ptr<Type> ref) : ref_(ref) {}
     PointerType(const PointerType &other) : ref_(other.ref_->get()) {}
     std::shared_ptr<Type> get() const
     {

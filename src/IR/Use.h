@@ -16,6 +16,24 @@ namespace ir
     User *getUser() const { return user_; }
     void setUser(User *user) { user_ = user; }
 
+    // Use &operator=(Use &other)
+    // {
+    //   if (this != &other)
+    //   {
+    //     if (val_)
+    //     {
+    //       val_->unbindUse(this);
+    //     }
+    //     val_ = other.val_;
+    //     if (val_)
+    //     {
+    //       val_->bindUse(this);
+    //     }
+    //     user_ = other.user_;
+    //   }
+    //   return *this;
+    // }
+
   protected:
     std::shared_ptr<Value> val_;
     User *user_;

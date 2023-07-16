@@ -41,6 +41,7 @@ namespace ir
     Value & setName(std::string name) { name_ = std::move(name); return *this; }
     std::string getName() const { return name_; }
 
+    void setType(std::shared_ptr<Type> type) { type_ = std::move(type); }
     std::shared_ptr<Type> getType() const { return type_->copy(); }
 
     // virtual bool isConstant() const = 0;

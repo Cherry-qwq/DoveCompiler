@@ -25,6 +25,14 @@ namespace front
   {
     if (ctx_.symbolTable->getCurrentScope()->isGlobal())
     {
+      if (context->constDecl())
+      {
+        context->constDecl()->accept(this);
+      }
+      else if (context->varDecl())
+      {
+        context->varDecl()->accept(this);
+      }
     }
     else
     {
@@ -32,7 +40,8 @@ namespace front
     return 0;
   };
   std::any VisitorImpl::visitConstDecl(SysYParser::ConstDeclContext *context)
-  { // TODO
+  { 
+    
     return 0;
   };
   std::any VisitorImpl::visitBType(SysYParser::BTypeContext *context)
@@ -47,7 +56,6 @@ namespace front
       typeID = ir::PrimitiveDataType::TypeID::Float32;
     }
     return typeID;
-    return 0;
   };
   std::any VisitorImpl::visitConstDef(SysYParser::ConstDefContext *context)
   { // TODO
@@ -62,12 +70,14 @@ namespace front
     return 0;
   };
   std::any VisitorImpl::visitVarDecl(SysYParser::VarDeclContext *context)
-  { // TODO
+  { 
+    
     return 0;
   };
   std::any VisitorImpl::visitUnInitVarDef(SysYParser::UnInitVarDefContext *context)
-  { // TODO
-    return 0;
+  { 
+    std::shared_ptr<ir::Allocate> allocate = std::make_shared<ir::Allocate>(nullptr, context->Identifier()->getSymbol()->getText());
+    return allocate;
   };
   std::any VisitorImpl::visitInitVarDef(SysYParser::InitVarDefContext *context)
   { // TODO
