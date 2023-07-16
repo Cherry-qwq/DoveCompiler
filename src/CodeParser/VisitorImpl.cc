@@ -23,16 +23,16 @@ namespace front
   };
   std::any VisitorImpl::visitDecl(SysYParser::DeclContext *context)
   {
+    std::vector<std::shared_ptr<ir::Allocate>> allocates;
     if (context->constDecl())
     {
-      context->constDecl()->accept(this);
+      allocates=std::any_cast<std::vector<std::shared_ptr<ir::Allocate>>>(context->constDecl()->accept(this));
     }
     else if (context->varDecl())
     {
-      context->varDecl()->accept(this);
+      allocates=std::any_cast<std::vector<std::shared_ptr<ir::Allocate>>>(context->varDecl()->accept(this));
     }
-
-    return 0;
+    return allocates;
   };
   std::any VisitorImpl::visitConstDecl(SysYParser::ConstDeclContext *context)
   {
@@ -70,7 +70,9 @@ namespace front
     std::vector<std::shared_ptr<ir::Allocate>> allocates;
     for (auto varDef : context->varDef())
     {
-      allocates.push_back(std::any_cast<std::shared_ptr<ir::Allocate>> (varDef->accept(this)));
+      std::shared_ptr<ir::Allocate> a=std::any_cast<std::shared_ptr<ir::Allocate>> (varDef->accept(this));
+      a->setType(ir::MakePrimitiveDataType(typeID));
+      allocates.push_back(a);
     }
     return allocates;
 
