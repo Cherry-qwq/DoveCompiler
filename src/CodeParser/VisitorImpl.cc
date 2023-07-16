@@ -23,29 +23,24 @@ namespace front
   };
   std::any VisitorImpl::visitDecl(SysYParser::DeclContext *context)
   {
-    if (ctx_.symbolTable->getCurrentScope()->isGlobal())
+    if (context->constDecl())
     {
-      if (context->constDecl())
-      {
-        context->constDecl()->accept(this);
-      }
-      else if (context->varDecl())
-      {
-        context->varDecl()->accept(this);
-      }
+      context->constDecl()->accept(this);
     }
-    else
+    else if (context->varDecl())
     {
+      context->varDecl()->accept(this);
     }
+
     return 0;
   };
   std::any VisitorImpl::visitConstDecl(SysYParser::ConstDeclContext *context)
-  { 
-    
+  {
+
     return 0;
   };
   std::any VisitorImpl::visitBType(SysYParser::BTypeContext *context)
-  { 
+  {
     ir::PrimitiveDataType::TypeID typeID = ir::PrimitiveDataType::TypeID::Int32;
     if (context->Int())
     {
@@ -70,12 +65,12 @@ namespace front
     return 0;
   };
   std::any VisitorImpl::visitVarDecl(SysYParser::VarDeclContext *context)
-  { 
-    
+  {
+
     return 0;
   };
   std::any VisitorImpl::visitUnInitVarDef(SysYParser::UnInitVarDefContext *context)
-  { 
+  {
     std::shared_ptr<ir::Allocate> allocate = std::make_shared<ir::Allocate>(nullptr, context->Identifier()->getSymbol()->getText());
     return allocate;
   };
