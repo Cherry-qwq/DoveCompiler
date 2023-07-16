@@ -1,4 +1,4 @@
-
+#include "vector"
 #include "VisitorImpl.h"
 
 #include "Utils/Utils.h"
@@ -66,12 +66,18 @@ namespace front
   };
   std::any VisitorImpl::visitVarDecl(SysYParser::VarDeclContext *context)
   {
+    ir::PrimitiveDataType::TypeID typeID =std::any_cast<ir::PrimitiveDataType::TypeID>(context->bType()->accept(this));
+    std::vector<std::shared_ptr<ir::Allocate>> allocates;
+    for (auto varDef : context->varDef())
+    {
+      allocates.push_back(std::any_cast<std::shared_ptr<ir::Allocate>> (varDef->accept(this)));
+    }
+    return allocates;
 
-    return 0;
   };
   std::any VisitorImpl::visitUnInitVarDef(SysYParser::UnInitVarDefContext *context)
   {
-    std::shared_ptr<ir::Allocate> allocate = std::make_shared<ir::Allocate>(nullptr, context->Identifier()->getSymbol()->getText());
+    std::shared_ptr<ir::Allocate> allocate = std::make_shared<ir::Allocate>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), context->Identifier()->getSymbol()->getText());
     return allocate;
   };
   std::any VisitorImpl::visitInitVarDef(SysYParser::InitVarDefContext *context)

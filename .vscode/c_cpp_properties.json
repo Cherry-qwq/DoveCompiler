@@ -8,9 +8,10 @@
             ],
             "defines": [],
             "compilerPath": "/usr/bin/clang",
-            "cStandard": "c17",
+            "cStandard": "gnu23",
             "intelliSenseMode": "linux-clang-x64",
-            "configurationProvider": "ms-vscode.makefile-tools"
+            "configurationProvider": "ms-vscode.makefile-tools",
+            "cppStandard": "gnu++23"
         }
     ],
     "version": 4
