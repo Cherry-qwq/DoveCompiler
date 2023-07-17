@@ -13,7 +13,7 @@ namespace ir
   class Constant : public User
   {
   public:
-    explicit Constant(uint32_t val) : User(MakePrimitiveDataType(PrimitiveDataType::TypeID::Int32), "Constant"), val_(val) {}
+    explicit Constant(std::shared_ptr<Type> type, uint32_t val) : User(type, "Constant"), val_(val) {}
     std::string dump(DumpHelper &helper) const override
     {
       return std::to_string(val_);
