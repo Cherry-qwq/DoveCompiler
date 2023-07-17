@@ -13,7 +13,7 @@ namespace ir
   class Constant : public User
   {
   public:
-    explicit Constant(std::shared_ptr<Type> type, uint32_t val) : User(type, "ConstantInt"), is_int_(true), int_val_(val) {}
+    explicit Constant(std::shared_ptr<Type> type, int32_t val) : User(type, "ConstantInt"), is_int_(true), int_val_(val) {}
     explicit Constant(std::shared_ptr<Type> type, float val) : User(type, "ConstantFloat"), is_float_(true), float_val_(val) {}
     explicit Constant(std::shared_ptr<Type> type, bool val) : User(type, "ConstantBoolean"), is_bool_(true), bool_val_(val) {}
     std::string dump(DumpHelper &helper) const override
@@ -48,7 +48,7 @@ namespace ir
 
   protected:
     bool is_int_ = false;
-    uint32_t int_val_;
+    int32_t int_val_;
     bool is_float_ = false;
     float float_val_;
     bool is_bool_ = false;
