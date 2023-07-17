@@ -13,14 +13,46 @@ namespace ir
   class Constant : public User
   {
   public:
-    explicit Constant(std::shared_ptr<Type> type, uint32_t val) : User(type, "Constant"), val_(val) {}
+    explicit Constant(std::shared_ptr<Type> type, uint32_t val) : User(type, "ConstantInt"), is_int_(true), int_val_(val) {}
+    explicit Constant(std::shared_ptr<Type> type, float val) : User(type, "ConstantFloat"), is_float_(true), float_val_(val) {}
+    explicit Constant(std::shared_ptr<Type> type, bool val) : User(type, "ConstantBoolean"), is_bool_(true), bool_val_(val) {}
     std::string dump(DumpHelper &helper) const override
     {
-      return std::to_string(val_);
+      std::string output = "Constant ";
+      if (is_int_)
+        output += std::to_string(int_val_);
+      else if (is_float_)
+        output += std::to_string(float_val_);
+      else if (is_bool_)
+        output += std::to_string(bool_val_);
+      else
+        output += "null";
+      helper.add(output);
+      return output;
+    }
+
+    bool isInt() const
+    {
+      return is_int_;
+    }
+
+    bool isFloat() const
+    {
+      return is_float_;
+    }
+
+    bool isBool() const
+    {
+      return is_bool_;
     }
 
   protected:
-    uint32_t val_ = 0;
+    bool is_int_ = false;
+    uint32_t int_val_;
+    bool is_float_ = false;
+    float float_val_;
+    bool is_bool_ = false;
+    bool bool_val_;
   };
 
   class Allocate : public User
@@ -66,7 +98,7 @@ namespace ir
 
     std::string dump(DumpHelper &helper) const override
     {
-      std::string output="Store " + val_.getValue()->dump(helper) + " " + ptr_.getValue()->dump(helper);
+      std::string output = "Store " + val_.getValue()->dump(helper) + " " + ptr_.getValue()->dump(helper);
       helper.add(output);
       return output;
     }
