@@ -70,7 +70,10 @@ namespace ir
     {
       is_const_ = is_const;
     }
-
+    bool getConst() const
+    {
+      return is_const_;
+    }
   protected:
     std::shared_ptr<Type> type_;
     bool is_const_ = false;
