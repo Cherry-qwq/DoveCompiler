@@ -142,7 +142,12 @@ namespace front
   };
   std::any VisitorImpl::visitBlock(SysYParser::BlockContext *context)
   { // TODO
-    return 0;
+    std::vector<std::shared_ptr<ir::BasicBlock>> basicblock;
+    for(auto basicblock : context->blockItem())
+    {
+      basicblock->accept(this);
+    }
+    return basicblock;
   };
   std::any VisitorImpl::visitBlockItem(SysYParser::BlockItemContext *context)
   { // TODO
