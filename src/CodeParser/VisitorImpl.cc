@@ -19,6 +19,7 @@ namespace front
       for(auto allo : allocates){
           std::shared_ptr<Symbol> sym = std::make_shared<Symbol>(allo->getName(), allo);
           ctx_.symbolTable->addSymbolToGlobalScope(allo->getName(), sym);
+          ctx_.compUnit->addGlobalObject(allo);
       }
     }
     for (auto funcDef : context->funcDef())
