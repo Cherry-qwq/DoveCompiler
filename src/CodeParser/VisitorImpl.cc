@@ -222,9 +222,11 @@ namespace front
     return 0;
   };
   std::any VisitorImpl::visitPrimConstExp(SysYParser::PrimConstExpContext *context)
-  { 
- 
-
+  { // TODO
+    if (context->number())
+    {
+      return context->number()->accept(this);
+    }
     return 0;
   };
   std::any VisitorImpl::visitNumber(SysYParser::NumberContext *context)
