@@ -5,13 +5,31 @@
 
 namespace ir
 {
-  class Type : std::enable_shared_from_this<Type>
+  class Type
   {
   public:
     virtual ~Type() = default;
     virtual std::shared_ptr<Type> get() const = 0;
-    virtual std::shared_ptr<Type> copy() const =0;
+    virtual std::shared_ptr<Type> copy() const = 0;
     virtual std::string dump() = 0;
+
+    bool isPrimitive() const
+    {
+      return is_primitive_;
+    }
+    bool isPointer() const
+    {
+      return is_pointer_;
+    }
+    bool isArray() const
+    {
+      return is_array_;
+    }
+
+  protected:
+    bool is_primitive_ = false;
+    bool is_pointer_ = false;
+    bool is_array_ = false;
   };
 
   class PrimitiveDataType : public Type
@@ -25,7 +43,10 @@ namespace ir
       Void,
     };
 
-    PrimitiveDataType(TypeID id) : type_(id) {}
+    PrimitiveDataType(TypeID id) : type_(id)
+    {
+      is_primitive_ = true;
+    }
     std::shared_ptr<Type> get() const
     {
       return std::make_shared<PrimitiveDataType>(type_);
@@ -59,7 +80,10 @@ namespace ir
   class PointerType : public Type
   {
   public:
-    explicit PointerType(std::shared_ptr<Type> ref) : ref_(ref) {}
+    explicit PointerType(std::shared_ptr<Type> ref) : ref_(ref)
+    {
+      is_pointer_ = true;
+    };
     PointerType(const PointerType &other) : ref_(other.ref_->get()) {}
     std::shared_ptr<Type> get() const
     {
@@ -78,6 +102,9 @@ namespace ir
     std::shared_ptr<Type> ref_;
   };
   std::shared_ptr<PointerType> MakePointerType(std::shared_ptr<Type> ref);
+
+  
+
 
   std::shared_ptr<Type> MakeType(std::shared_ptr<Type> ptr);
 }
