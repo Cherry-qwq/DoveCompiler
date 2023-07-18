@@ -84,14 +84,13 @@ namespace ir
     {
       is_pointer_ = true;
     };
-    PointerType(const PointerType &other) : ref_(other.ref_->get()) {}
     std::shared_ptr<Type> get() const
     {
       return ref_->get();
     }
     std::shared_ptr<Type> copy() const
     {
-      return std::make_shared<PointerType>(std::make_shared<PointerType>(ref_->copy()));
+      return std::make_shared<PointerType>(ref_);
     }
     std::string dump()
     {
@@ -104,42 +103,41 @@ namespace ir
 
   std::shared_ptr<PointerType> MakePointerType(std::shared_ptr<Type> ref);
 
-  
-
-
   std::shared_ptr<Type> MakeType(std::shared_ptr<Type> ptr);
 
- class ArrayType : public Type
+  class ArrayType : public Type
   {
   public:
-    explicit ArrayType(std::shared_ptr<Type>  eltype,size_t len) :  eltype_( eltype) ,len_(len){}
-    explicit ArrayType(const ArrayType &other) :  eltype_(other.eltype_->get()), len_(other.getLen()) {}
+    explicit ArrayType(std::shared_ptr<Type> eltype, size_t len) : eltype_(eltype), len_(len)
+    {
+      is_array_ = true;
+    }
     std::shared_ptr<Type> get() const
     {
-      return  eltype_->get();
+      return eltype_->get();
     }
     std::shared_ptr<Type> copy() const
     {
-      return std::make_shared<ArrayType>(std::make_shared<ArrayType>( eltype_->copy()),len_);
+      return std::make_shared<ArrayType>(eltype_, len_);
     }
     std::string dump()
     {
-      return "" +  eltype_->dump() + "[" + std::to_string(int(len_)) + "]";
+      return "" + eltype_->dump() + "[" + std::to_string(int(len_)) + "]";
     }
     size_t getLen() const
     {
       return len_;
     }
-    void setLen(size_t len) 
+    void setLen(size_t len)
     {
-      len_=len;
+      len_ = len;
     }
 
-   protected:
-    std::shared_ptr<Type>  eltype_;
+  protected:
+    std::shared_ptr<Type> eltype_;
     size_t len_;
   };
 
-  std::shared_ptr<ArrayType> MakeArrayType(std::shared_ptr<Type>  eltype,size_t len);
+  std::shared_ptr<ArrayType> MakeArrayType(std::shared_ptr<Type> eltype, size_t len);
 
 }
