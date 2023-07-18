@@ -21,4 +21,8 @@ namespace ir
     return ptr->get();
   }
 
+  std::shared_ptr<ArrayType> MakeArrayType(std::shared_ptr<Type> elementType,size_t len)
+  {
+    return std::make_shared<ArrayType>(elementType,len);
+  }
 }
