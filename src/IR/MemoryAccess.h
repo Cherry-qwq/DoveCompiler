@@ -61,7 +61,7 @@ namespace ir
     Allocate(std::shared_ptr<Type> type, std::string name) : User(MakePointerType(type->copy()), std::move(name)), type_(std::move(type)){};
     std::string dump(DumpHelper &helper) const override
     {
-      std::string output = "Allocate " + getName() + ": " + getType()->dump();
+      std::string output = (is_const_ ?"Constant ":"Allocate ") + getName() + ": " + getType()->dump();
       helper.add(output);
       return output;
     }
