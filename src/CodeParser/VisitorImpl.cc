@@ -231,7 +231,18 @@ namespace front
   };
   std::any VisitorImpl::visitNumber(SysYParser::NumberContext *context)
   { // TODO
-    return 0;
+      auto p = std::shared_ptr<ir::Value>();
+      if(context->IntLiteral()){
+          auto i = utils::ParseInt32(context->getText());
+          p = std::make_shared<ir::Constant>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32),i);
+          //Constant(std::shared_ptr<Type> type, uint32_t val)
+      }else if(context->FloatLiteral()){
+          auto i = utils::ParseFloat32(context->getText());
+          p = std::make_shared<ir::Constant>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Float32),i);
+      }
+      //std::vector<std::shared_ptr<ir::Allocate>> allocates;
+
+    return p;
   };
   std::any VisitorImpl::visitUnaryToPrimExp(SysYParser::UnaryToPrimExpContext *context)
   { // TODO
