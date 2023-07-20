@@ -12,6 +12,7 @@ namespace ir
     virtual std::shared_ptr<Type> get() const = 0;
     virtual std::shared_ptr<Type> copy() const = 0;
     virtual std::string dump() = 0;
+    virtual size_t size() const = 0;
 
     bool isPrimitive() const
     {
@@ -71,6 +72,22 @@ namespace ir
         return "Unknown";
       }
     }
+    size_t size() const
+    {
+      switch (type_)
+      {
+      case TypeID::Int32:
+        return 4;
+      case TypeID::Float32:
+        return 4;
+      case TypeID::Boolean:
+        return 1;
+      case TypeID::Void:
+        return 0;
+      default:
+        return 0;
+      }
+    }
 
   protected:
     TypeID type_;
@@ -95,6 +112,10 @@ namespace ir
     std::string dump()
     {
       return "" + ref_->dump() + "*";
+    }
+    size_t size() const
+    {
+      return 8;
     }
 
   protected:
@@ -124,6 +145,11 @@ namespace ir
     {
       return "" + eltype_->dump() + "[" + std::to_string(int(len_)) + "]";
     }
+    size_t size() const
+    {
+      return eltype_->size() * len_;
+    }
+
     size_t getLen() const
     {
       return len_;
@@ -132,6 +158,7 @@ namespace ir
     {
       len_ = len;
     }
+
 
   protected:
     std::shared_ptr<Type> eltype_;
