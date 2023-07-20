@@ -10,15 +10,18 @@
 
 #include "SymbolTable.h"
 #include "IR/BasicBlock.h"
+#include "IR/MemoryAccess.h"
 #include "IR/ControlFlow.h"
+#include "Utils/Counter.h"
 
 namespace front
 {
 
-  class Context{
+  class Context
+  {
   public:
     std::shared_ptr<SymbolTable> symbolTable = std::make_shared<SymbolTable>();
-    
+
     std::shared_ptr<ir::CompUnit> compUnit;
     std::shared_ptr<ir::Function> currentFunction;
 
@@ -27,7 +30,9 @@ namespace front
     std::shared_ptr<ir::BasicBlock> entryBasicBlock;
     std::shared_ptr<ir::BasicBlock> currentBasicBlock;
     std::shared_ptr<ir::BasicBlock> exitBasicBlock;
-    
+    utils::Counter basicBlockCounter = utils::Counter(0);
+    utils::Counter registerFFCounter = utils::Counter(0); // registers for current function
+
     std::shared_ptr<ir::Allocate> returnAllocate;
   };
 

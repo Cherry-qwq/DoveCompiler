@@ -154,4 +154,8 @@ namespace ir
   {
     // TODO
   };
+
+    class Call : public Instruction
+  {
+  };
 }

@@ -20,8 +20,13 @@ namespace ir
     {
       return is_allocate_;
     }
+    bool isVirtualRegister() const
+    {
+      return is_virtual_register_;
+    }
     protected:
     bool is_constant_;
     bool is_allocate_;
+    bool is_virtual_register_;
   };
 }

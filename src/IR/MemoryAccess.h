@@ -5,7 +5,7 @@
 #include <utility>
 #include <string>
 
-#include "TypeFactory.h"
+#include "Type.h"
 #include "Instruction.h"
 
 namespace ir
@@ -13,9 +13,9 @@ namespace ir
   class Constant : public User
   {
   public:
-    explicit Constant(std::shared_ptr<Type> type, int32_t val) : User(type, "ConstantInt"), is_int_(true), int_val_(val) {is_constant_=true;}
-    explicit Constant(std::shared_ptr<Type> type, float val) : User(type, "ConstantFloat"), is_float_(true), float_val_(val) {is_constant_=true;}
-    explicit Constant(std::shared_ptr<Type> type, bool val) : User(type, "ConstantBoolean"), is_bool_(true), bool_val_(val) {is_constant_=true;}
+    explicit Constant(std::shared_ptr<Type> type, int32_t val) : User(type, "ConstantInt"), is_int_(true), int_val_(val) { is_constant_ = true; }
+    explicit Constant(std::shared_ptr<Type> type, float val) : User(type, "ConstantFloat"), is_float_(true), float_val_(val) { is_constant_ = true; }
+    explicit Constant(std::shared_ptr<Type> type, bool val) : User(type, "ConstantBoolean"), is_bool_(true), bool_val_(val) { is_constant_ = true; }
     std::string dump(DumpHelper &helper) const override
     {
       std::string output = "Constant ";
@@ -58,10 +58,10 @@ namespace ir
   class Allocate : public User
   {
   public:
-    Allocate(std::shared_ptr<Type> type, std::string name) : User(MakePointerType(type->copy()), std::move(name)), type_(std::move(type)){is_allocate_=true;};
+    Allocate(std::shared_ptr<Type> type, std::string name) : User(MakePointerType(type->copy()), std::move(name)), type_(std::move(type)) { is_allocate_ = true; };
     std::string dump(DumpHelper &helper) const override
     {
-      std::string output = (is_const_ ?"Constant ":"Allocate ") + getName() + ": " + getType()->dump();
+      std::string output = (is_const_ ? "Constant " : "Allocate ") + getName() + ": " + getType()->dump();
       helper.add(output);
       return output;
     }
@@ -74,6 +74,7 @@ namespace ir
     {
       return is_const_;
     }
+
   protected:
     std::shared_ptr<Type> type_;
     bool is_const_ = false;
@@ -121,6 +122,22 @@ namespace ir
 
   class InsertValue : public Instruction
   {
+  };
+
+  class VirtualRegister : public User
+  {
+  public:
+    VirtualRegister(std::shared_ptr<Type> type, std::shared_ptr<User> val, size_t count, std::string name) : User(type, std::move(name)), val_(val, this), count_(count) { is_virtual_register_ = true; };
+    std::string dump(DumpHelper &helper) const override
+    {
+      std::string output = "VirtualRegister " + getName() + ": " + getType()->dump();
+      helper.add(output);
+      return output;
+    }
+
+  protected:
+    Use val_;
+    size_t count_ = 0;
   };
 
 }

@@ -16,4 +16,5 @@ namespace utils
   {
     return std::stof(str);
   }
+
 }

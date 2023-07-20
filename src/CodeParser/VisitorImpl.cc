@@ -1,8 +1,6 @@
 #include "vector"
 #include "VisitorImpl.h"
-
 #include "Utils/Utils.h"
-
 namespace front
 {
 
