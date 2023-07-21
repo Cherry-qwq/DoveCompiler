@@ -19,15 +19,18 @@ namespace front
     Symbol(const Symbol &symbol) = default;
     Symbol(const std::string &name, std::shared_ptr<ir::Allocate> symbol)
         : name_(name), allocate_(symbol){};
+    Symbol(const std::string &name, std::shared_ptr<ir::Constant> symbol)
+        : name_(name), constant_(symbol), is_constant_(true){};
     ~Symbol() = default;
 
     std::string getName() { return name_; };
     std::shared_ptr<ir::Allocate> getAllocate() { return allocate_; };
-    void setConstant() { is_constant_ = true; };
-
+    std::shared_ptr<ir::Constant> getConstant() { return constant_; };
+    bool isConstant() { return is_constant_; };
   protected:
     std::string name_;
     std::shared_ptr<ir::Allocate> allocate_;
+    std::shared_ptr<ir::Constant> constant_;
     std::shared_ptr<Scope> scope_;
     bool is_constant_ = false;
   };

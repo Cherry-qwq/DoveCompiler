@@ -8,16 +8,20 @@ namespace front
   {
     ctx_.symbolTable->pushScope("global");
     ctx_.compUnit = std::make_shared<ir::CompUnit>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), "compUnit");
-    
+
     for (auto decl : context->decl())
     {
-      std::vector<std::shared_ptr<ir::Allocate>> allocates;
-      allocates = std::any_cast<std::vector<std::shared_ptr<ir::Allocate>>>(decl->accept(this));
-      //allocates=decl->accept(this);
-      for(auto allo : allocates){
-          std::shared_ptr<Symbol> sym = std::make_shared<Symbol>(allo->getName(), allo);
-          ctx_.symbolTable->addSymbolToGlobalScope(allo->getName(), sym);
-          ctx_.compUnit->addGlobalObject(allo);
+      std::vector<std::shared_ptr<ir::User>> users = std::any_cast<std::vector<std::shared_ptr<ir::User>>>(decl->accept(this));
+      // allocates=decl->accept(this);
+      for (auto user : users)
+      {
+        std::shared_ptr<Symbol> sym;
+        if (user->isAllocate())
+          sym = std::make_shared<Symbol>(user->getName(), std::dynamic_pointer_cast<ir::Allocate>(user));
+        else if (user->isConstant())
+          sym = std::make_shared<Symbol>(user->getName(), std::dynamic_pointer_cast<ir::Constant>(user));
+        ctx_.symbolTable->addSymbolToGlobalScope(user->getName(), sym);
+        ctx_.compUnit->addGlobalObject(user);
       }
     }
     for (auto funcDef : context->funcDef())
@@ -29,28 +33,27 @@ namespace front
   };
   std::any VisitorImpl::visitDecl(SysYParser::DeclContext *context)
   {
-    std::vector<std::shared_ptr<ir::Allocate>> allocates;
+    std::vector<std::shared_ptr<ir::User>> users;
     if (context->constDecl())
     {
-      allocates = std::any_cast<std::vector<std::shared_ptr<ir::Allocate>>>(context->constDecl()->accept(this));
+      users = std::any_cast<std::vector<std::shared_ptr<ir::User>>>(context->constDecl()->accept(this));
     }
     else if (context->varDecl())
     {
-      allocates = std::any_cast<std::vector<std::shared_ptr<ir::Allocate>>>(context->varDecl()->accept(this));
+      users = std::any_cast<std::vector<std::shared_ptr<ir::User>>>(context->varDecl()->accept(this));
     }
-    return allocates;
+    return users;
   };
   std::any VisitorImpl::visitConstDecl(SysYParser::ConstDeclContext *context)
   {
     ir::PrimitiveDataType::TypeID typeID = std::any_cast<ir::PrimitiveDataType::TypeID>(context->bType()->accept(this));
-    std::vector<std::shared_ptr<ir::Allocate>> allocates;
+    std::vector<std::shared_ptr<ir::Constant>> constants;
     for (auto constDef : context->constDef())
     {
-      std::shared_ptr<ir::Allocate> a = std::any_cast<std::shared_ptr<ir::Allocate>>(constDef->accept(this));
-      a->setType(ir::MakePrimitiveDataType(typeID));
-      allocates.push_back(a);
+      std::shared_ptr<ir::Constant> a = std::any_cast<std::shared_ptr<ir::Constant>>(constDef->accept(this));
+      constants.push_back(a);
     }
-    return allocates;
+    return constants;
   };
   std::any VisitorImpl::visitBType(SysYParser::BTypeContext *context)
   {
@@ -66,11 +69,19 @@ namespace front
     return typeID;
   };
   std::any VisitorImpl::visitConstDef(SysYParser::ConstDefContext *context)
-  { 
-    std::shared_ptr<ir::Allocate> allocate = std::make_shared<ir::Allocate>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), context->Identifier()->getSymbol()->getText());
+  {
+    std::shared_ptr<ir::Constant> constant;
+    std::string name = context->Identifier()->getSymbol()->getText();
+    std::shared_ptr<ir::Type> arrtype = ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32);
+    if(context->constExp().size()>0)
+    for (auto constExp : context->constExp())
+    {
+      ir::Constant constant = std::any_cast<ir::Constant>(constExp->accept(this));
+      int32_t val = constant.getIntVal();
+      arrtype = MakeArrayType(arrtype, val);
+    }
     context->constInitVal()->accept(this);
-    allocate->setConst(true);
-    return allocate;
+    return constant;
   };
   std::any VisitorImpl::visitScalarConstInitVal(SysYParser::ScalarConstInitValContext *context)
   { // TODO
@@ -95,12 +106,21 @@ namespace front
   std::any VisitorImpl::visitUnInitVarDef(SysYParser::UnInitVarDefContext *context)
   {
     std::shared_ptr<ir::Allocate> allocate = std::make_shared<ir::Allocate>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), context->Identifier()->getSymbol()->getText());
+    std::shared_ptr<ir::Type> arrtype = MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32);
+
+    if(context->constExp().size()>0)
+    for (auto constExp : context->constExp())
+    {
+      // ir::Constant constant = std::any_cast<ir::Constant>(constExp->accept(this));
+      int32_t val = 0;//constant.getIntVal();
+      arrtype = MakeArrayType(arrtype, val);
+    }
+    allocate->setType(arrtype);
     return allocate;
   };
   std::any VisitorImpl::visitInitVarDef(SysYParser::InitVarDefContext *context)
-  { 
+  {
     std::shared_ptr<ir::Allocate> allocate = std::make_shared<ir::Allocate>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), context->Identifier()->getSymbol()->getText());
-    context->initVal()->accept(this);
     return allocate;
   };
   std::any VisitorImpl::visitScalarInitVal(SysYParser::ScalarInitValContext *context)
@@ -155,7 +175,7 @@ namespace front
     return 0;
   };
   std::any VisitorImpl::visitBlockItem(SysYParser::BlockItemContext *context)
-  { 
+  {
     // TODO
     return 0;
   };
@@ -229,16 +249,19 @@ namespace front
   };
   std::any VisitorImpl::visitNumber(SysYParser::NumberContext *context)
   { // TODO
-      auto p = std::shared_ptr<ir::Value>();
-      if(context->IntLiteral()){
-          auto i = utils::ParseInt32(context->getText());
-          p = std::make_shared<ir::Constant>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32),i);
-          //Constant(std::shared_ptr<Type> type, uint32_t val)
-      }else if(context->FloatLiteral()){
-          auto i = utils::ParseFloat32(context->getText());
-          p = std::make_shared<ir::Constant>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Float32),i);
-      }
-      //std::vector<std::shared_ptr<ir::Allocate>> allocates;
+    auto p = std::shared_ptr<ir::Value>();
+    if (context->IntLiteral())
+    {
+      auto i = utils::ParseInt32(context->getText());
+      p = std::make_shared<ir::Constant>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), "Int", i);
+      // Constant(std::shared_ptr<Type> type, uint32_t val)
+    }
+    else if (context->FloatLiteral())
+    {
+      auto i = utils::ParseFloat32(context->getText());
+      p = std::make_shared<ir::Constant>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Float32), "Float", i);
+    }
+    // std::vector<std::shared_ptr<ir::Allocate>> allocates;
 
     return p;
   };
@@ -318,11 +341,11 @@ namespace front
   { // TODO
     return 0;
   };
+  //* @return ir::Constant
   std::any VisitorImpl::visitConstExp(SysYParser::ConstExpContext *context)
   { // TODO
     return 0;
   };
-
   std::any VisitorImpl::visitTerminal(antlr4::tree::TerminalNode *node)
   { // TODO
     return 0;

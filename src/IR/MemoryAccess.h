@@ -13,9 +13,10 @@ namespace ir
   class Constant : public User
   {
   public:
-    explicit Constant(std::shared_ptr<Type> type, int32_t val) : User(type, "ConstantInt"), is_int_(true), int_val_(val) { is_constant_ = true; }
-    explicit Constant(std::shared_ptr<Type> type, float val) : User(type, "ConstantFloat"), is_float_(true), float_val_(val) { is_constant_ = true; }
-    explicit Constant(std::shared_ptr<Type> type, bool val) : User(type, "ConstantBoolean"), is_bool_(true), bool_val_(val) { is_constant_ = true; }
+    explicit Constant(std::shared_ptr<Type> type, std::string name, int32_t val) : User(type, "ConstantInt"), is_int_(true), int_val_(val) { is_constant_ = true; }
+    explicit Constant(std::shared_ptr<Type> type, std::string name, float val) : User(type, "ConstantFloat"), is_float_(true), float_val_(val) { is_constant_ = true; }
+    explicit Constant(std::shared_ptr<Type> type, std::string name, bool val) : User(type, "ConstantBoolean"), is_bool_(true), bool_val_(val) { is_constant_ = true; }
+    explicit Constant(std::shared_ptr<Type> type, std::string name, std::vector<Constant> vals) : User(type, "ConstantArray"), is_array_(true), array_vals_(vals) { is_constant_ = true; }
     std::string dump(DumpHelper &helper) const override
     {
       std::string output = "Constant ";
@@ -45,6 +46,31 @@ namespace ir
     {
       return is_bool_;
     }
+    bool isArray() const
+    {
+      return is_array_;
+    }
+
+    int32_t getIntVal() const
+    {
+      return int_val_;
+    }
+    float getFloatVal() const
+    {
+      return float_val_;
+    }
+    bool getBoolVal() const
+    {
+      return bool_val_;
+    }
+    ir::Constant arrAt(size_t index) const
+    {
+      return array_vals_[index];
+    }
+    std::vector<ir::Constant> getArrayVal() const
+    {
+      return array_vals_;
+    }
 
   protected:
     bool is_int_ = false;
@@ -53,6 +79,8 @@ namespace ir
     float float_val_;
     bool is_bool_ = false;
     bool bool_val_;
+    bool is_array_ = false;
+    std::vector<Constant> array_vals_;
   };
 
   class Allocate : public User

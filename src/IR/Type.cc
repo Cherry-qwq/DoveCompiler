@@ -21,8 +21,21 @@ namespace ir
     return ptr->get();
   }
 
-  std::shared_ptr<ArrayType> MakeArrayType(std::shared_ptr<Type> elementType,size_t len)
+  std::shared_ptr<ArrayType> MakeArrayType(std::shared_ptr<Type> elementType, size_t len)
   {
-    return std::make_shared<ArrayType>(elementType,len);
+    return std::make_shared<ArrayType>(elementType, len);
+  }
+
+  void ArrayType::setInternalType(std::shared_ptr<Type> eltype)
+  {
+    if (eltype_->isArray())
+    {
+      std::dynamic_pointer_cast<ArrayType>(eltype_)->setInternalType(eltype);
+    }
+    else
+    {
+      eltype_ = eltype;
+    }
+    return;
   }
 }

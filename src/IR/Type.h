@@ -149,7 +149,6 @@ namespace ir
     {
       return eltype_->size() * len_;
     }
-
     size_t getLen() const
     {
       return len_;
@@ -159,6 +158,7 @@ namespace ir
       len_ = len;
     }
 
+    void setInternalType(std::shared_ptr<Type>);
 
   protected:
     std::shared_ptr<Type> eltype_;
