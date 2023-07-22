@@ -30,7 +30,8 @@ int main(int argc, char *argv[])
 
 	//back
 	auto asm_gen = asmgen::AsmGenerator(irp);
-	auto asm_code = asm_gen.generate();
+	asm_gen.generate();
+	auto asm_code = asm_gen.exportToString();
 	std::cout << asm_code << std::endl;
 	asm_gen.exportToFile("a.s");
 

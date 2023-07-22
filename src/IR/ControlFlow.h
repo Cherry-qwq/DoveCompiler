@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 
+#include "BasicBlock.h"
 #include "Instruction.h"
 namespace ir
 {
