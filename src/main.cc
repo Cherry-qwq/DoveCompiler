@@ -5,6 +5,7 @@
 
 #include "Utils/Configure.h"
 #include "CodeParser/VisitorImpl.h"
+#include "Assemble/AsmGen.h"
 int main(int argc, char *argv[])
 {
 	config::init(argc, argv);
@@ -28,6 +29,11 @@ int main(int argc, char *argv[])
 	std::cout<<output<<std::endl;
 
 	//back
+	auto asm_gen = asmgen::AsmGenerator(irp);
+	auto asm_code = asm_gen.generate();
+	std::cout << asm_code << std::endl;
+	asm_gen.exportToFile("a.s");
+
 	std::cout << "Bye" << std::endl;
 	return 0;
 }

@@ -72,16 +72,16 @@ namespace ir
     std::vector<std::shared_ptr<BasicBlock>> basic_blocks_;
   };
 
-  class Icmp : public User
+  class Icmp : public Instruction
   {
     // TODO
   };
 
-  class Branch : public User
+  class Branch : public Instruction
   {
   public:
     Branch(std::shared_ptr<Value> condition, std::string name)
-        : User(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name)), condition_(condition, this){};
+        : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name), 3), condition_(condition, this){};
     std::string dump(DumpHelper &helper) const override
     {
       std::string output = "Branch " + getName() + " ";
@@ -122,7 +122,7 @@ namespace ir
     Use condition_;
   };
 
-  class Jump : public Instruction
+  class Jump : public Instruction // Used in Break and Continue
   {
   public:
     Jump(std::shared_ptr<BasicBlock> target, std::string name)
@@ -155,7 +155,8 @@ namespace ir
     // TODO
   };
 
-    class Call : public Instruction
+  class Call : public Instruction
   {
+    // TODO
   };
 }

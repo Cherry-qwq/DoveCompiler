@@ -39,6 +39,8 @@ namespace ir
       }
       return "Unknown";
     };
+    std::string getLabel = "label_" + getName();
+
     std::string dump(DumpHelper &helper) const override
     {
       auto s = "BasicBlock " + getName() + ": " + getStringifyBlockType();
@@ -61,8 +63,6 @@ namespace ir
     {
       return instructions_;
     }
-
-    std::string getLabel = "label_" + getName();
 
     BlockType getBlockType() const
     {

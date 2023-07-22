@@ -10,13 +10,13 @@
 
 namespace ir
 {
-  class Constant : public User
+  class Constant : public Instruction
   {
   public:
-    explicit Constant(std::shared_ptr<Type> type, std::string name, int32_t val) : User(type, "ConstantInt"), is_int_(true), int_val_(val) { is_constant_ = true; }
-    explicit Constant(std::shared_ptr<Type> type, std::string name, float val) : User(type, "ConstantFloat"), is_float_(true), float_val_(val) { is_constant_ = true; }
-    explicit Constant(std::shared_ptr<Type> type, std::string name, bool val) : User(type, "ConstantBoolean"), is_bool_(true), bool_val_(val) { is_constant_ = true; }
-    explicit Constant(std::shared_ptr<Type> type, std::string name, std::vector<Constant> vals) : User(type, "ConstantArray"), is_array_(true), array_vals_(vals) { is_constant_ = true; }
+    explicit Constant(std::shared_ptr<Type> type, std::string name, int32_t val) : Instruction(type, std::move(name), 2), is_int_(true), int_val_(val) { is_constant_ = true; }
+    explicit Constant(std::shared_ptr<Type> type, std::string name, float val) : Instruction(type, std::move(name), 2), is_float_(true), float_val_(val) { is_constant_ = true; }
+    explicit Constant(std::shared_ptr<Type> type, std::string name, bool val) : Instruction(type, std::move(name), 2), is_bool_(true), bool_val_(val) { is_constant_ = true; }
+    explicit Constant(std::shared_ptr<Type> type, std::string name, std::vector<Constant> vals) : Instruction(type, std::move(name), 2), is_array_(true), array_vals_(vals) { is_constant_ = true; }
     std::string dump(DumpHelper &helper) const override
     {
       std::string output = "Constant ";
@@ -83,10 +83,10 @@ namespace ir
     std::vector<Constant> array_vals_;
   };
 
-  class Allocate : public User
+  class Allocate : public Instruction
   {
   public:
-    Allocate(std::shared_ptr<Type> type, std::string name) : User(MakePointerType(type->copy()), std::move(name)), type_(std::move(type)) { is_allocate_ = true; };
+    Allocate(std::shared_ptr<Type> type, std::string name) : Instruction(MakePointerType(type->copy()), std::move(name), 1), type_(std::move(type)) { is_allocate_ = true; };
     std::string dump(DumpHelper &helper) const override
     {
       std::string output = (is_const_ ? "Constant " : "Allocate ") + getName() + ": " + getType()->dump();
@@ -142,6 +142,17 @@ namespace ir
 
   class GetElementPtr : public Instruction
   {
+  public:
+    explicit GetElementPtr(std::shared_ptr<User> ptr, std::shared_ptr<Type> type, std::vector<std::shared_ptr<User>> idx, const std::string &name) : Instruction(MakePointerType(ptr->getType()->copy()), std::move(name), 2), ptr_(ptr, this){
+      for (auto &i : idx)
+      {
+        idx_.push_back(Use(i, this));
+      }
+    };
+
+  protected:
+    Use ptr_;
+    std::vector<Use> idx_;
   };
 
   class ExtractValue : public Instruction
@@ -151,29 +162,4 @@ namespace ir
   class InsertValue : public Instruction
   {
   };
-
-  class VirtualRegister : public User
-  {
-  public:
-    VirtualRegister(std::shared_ptr<Type> type, std::shared_ptr<User> val, size_t count, std::string name) : User(type, std::move(name)), val_(val, this), count_(count) { is_virtual_register_ = true; };
-    std::string dump(DumpHelper &helper) const override
-    {
-      std::string output = "VirtualRegister " + getName() + ": " + getType()->dump();
-      helper.add(output);
-      return output;
-    }
-
-    void setCount(size_t count)
-    {
-      count_ = count;
-    }
-    size_t getCount() const
-    {
-      return count_;
-    }
-  protected:
-    Use val_;
-    size_t count_ = 0;
-  };
-
 }
