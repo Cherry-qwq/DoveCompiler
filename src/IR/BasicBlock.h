@@ -10,7 +10,7 @@ namespace ir
   class BasicBlock : public User, std::enable_shared_from_this<BasicBlock>
   {
   public:
-    explicit BasicBlock(std::string name) : User(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name)){};
+    explicit BasicBlock(const std::string &name) : User(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name)){};
     std::string dump(DumpHelper &helper) const override
     {
       auto s = "BasicBlock " + getName();

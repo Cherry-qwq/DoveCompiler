@@ -163,6 +163,14 @@ namespace ir
       return output;
     }
 
+    void setCount(size_t count)
+    {
+      count_ = count;
+    }
+    size_t getCount() const
+    {
+      return count_;
+    }
   protected:
     Use val_;
     size_t count_ = 0;
