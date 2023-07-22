@@ -214,13 +214,23 @@ namespace front
   { // TODO
     return 0;
   };
+
   std::any VisitorImpl::visitBlock(SysYParser::BlockContext *context)
-  { // TODO
+  { 
+    //This block is different from the BasicBlock in ControlFlow, this block is a scope
+    ctx_.symbolTable->pushScope("block");
+    for(auto blockItem: context->blockItem()){
+      blockItem->accept(this);
+    }
     return 0;
   };
   std::any VisitorImpl::visitBlockItem(SysYParser::BlockItemContext *context)
   {
-    // TODO
+    if(context->decl()){
+      context->decl()->accept(this);
+    }else if(context->stmt()){
+      context->stmt()->accept(this);
+    }
     return 0;
   };
   std::any VisitorImpl::visitAssignmentStmt(SysYParser::AssignmentStmtContext *context)
@@ -232,15 +242,38 @@ namespace front
     return 0;
   };
   std::any VisitorImpl::visitBlockStmt(SysYParser::BlockStmtContext *context)
-  { // TODO
+  { 
+    context->block()->accept(this);
     return 0;
   };
   std::any VisitorImpl::visitIfStmt(SysYParser::IfStmtContext *context)
-  { // TODO
+  { 
+    ctx_.symbolTable->pushScope("if");
+    auto bb = std::make_shared<ir::BasicBlock>("_" + ctx_.currentFunction->getName() + "_if_" + std::to_string(ctx_.basicBlockCounter.next()));
+    ctx_.currentFunction->addBasicBlock(bb);
+
+    context->stmt()->accept(this);
+
+    ctx_.symbolTable->popScope();
     return 0;
   };
   std::any VisitorImpl::visitIfElseStmt(SysYParser::IfElseStmtContext *context)
-  { // TODO
+  { 
+    ctx_.symbolTable->pushScope("if");
+    auto bbt = std::make_shared<ir::BasicBlock>("_" + ctx_.currentFunction->getName() + "_if_" + std::to_string(ctx_.basicBlockCounter.next()));
+    ctx_.currentFunction->addBasicBlock(bbt);
+
+    context->stmt(0)->accept(this);
+
+    ctx_.symbolTable->popScope();
+
+    ctx_.symbolTable->pushScope("else");
+    auto bbf = std::make_shared<ir::BasicBlock>("_" + ctx_.currentFunction->getName() + "_else_" + std::to_string(ctx_.basicBlockCounter.next()));
+    ctx_.currentFunction->addBasicBlock(bbf);
+
+    context->stmt(1)->accept(this);
+
+    ctx_.symbolTable->popScope();
     return 0;
   };
   std::any VisitorImpl::visitWhileStmt(SysYParser::WhileStmtContext *context)
