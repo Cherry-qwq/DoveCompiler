@@ -109,9 +109,12 @@ namespace front
     for (auto varDef : context->varDef())
     {
       auto allocate = std::any_cast<std::shared_ptr<ir::Allocate>>(varDef->accept(this));
-      if(allocate->getType()->isArray()){
+      if (allocate->getType()->isArray())
+      {
         std::dynamic_pointer_cast<ir::ArrayType>(allocate->getType())->setInternalType(ir::MakePrimitiveDataType(typeID));
-      }else{
+      }
+      else
+      {
         allocate->setType(ir::MakePrimitiveDataType(typeID));
       }
       allocates.push_back(allocate);
@@ -124,9 +127,10 @@ namespace front
     auto allocate = std::make_shared<ir::Allocate>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), varName);
     std::shared_ptr<ir::Type> arr_type = MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32);
 
-    if (context->constExp().size() > 0){
+    if (context->constExp().size() > 0)
+    {
       // std::reverse(context->constExp().begin(), context->constExp().end());
-      for (auto constExp: context->constExp())
+      for (auto constExp : context->constExp())
       {
         // idx requests a constant
         auto idx = std::any_cast<std::shared_ptr<ir::Constant>>(constExp->accept(this));
@@ -163,7 +167,7 @@ namespace front
     return allocate;
   };
   std::any VisitorImpl::visitScalarInitVal(SysYParser::ScalarInitValContext *context)
-  { 
+  {
     return context->exp()->accept(this);
   };
   std::any VisitorImpl::visitListInitVal(SysYParser::ListInitValContext *context)
@@ -180,9 +184,11 @@ namespace front
     if (context->block())
     {
       // Add entry basic block to function
-      auto bb = std::make_shared<ir::BasicBlock>("_" + funcName + "_entry");
+      auto entry_bb_name = "_" + funcName + "_entry";
+      auto bb = std::make_shared<ir::BasicBlock>(entry_bb_name, ir::BasicBlock::BlockType::FunctionEntry);
       ctx_.currentBasicBlock = bb;
-      ctx_.currentFunction->addBasicBlock(ctx_.currentBasicBlock);
+      ctx_.currentFunction->addBasicBlock(bb);
+
       context->block()->accept(this);
     }
 
@@ -216,80 +222,122 @@ namespace front
   };
 
   std::any VisitorImpl::visitBlock(SysYParser::BlockContext *context)
-  { 
-    //This block is different from the BasicBlock in ControlFlow, this block is a scope
+  {
+    // This block is different from the BasicBlock in ControlFlow, this block is a scope
     ctx_.symbolTable->pushScope("block");
-    for(auto blockItem: context->blockItem()){
+    for (auto blockItem : context->blockItem())
+    {
       blockItem->accept(this);
     }
     return 0;
   };
   std::any VisitorImpl::visitBlockItem(SysYParser::BlockItemContext *context)
   {
-    if(context->decl()){
+    if (context->decl())
+    {
       context->decl()->accept(this);
-    }else if(context->stmt()){
+      // TODO Add decl allocates to current basic block
+    }
+    else if (context->stmt())
+    {
       context->stmt()->accept(this);
     }
     return 0;
   };
   std::any VisitorImpl::visitAssignmentStmt(SysYParser::AssignmentStmtContext *context)
-  { // TODO
+  { // TODO Add this instructions to current basic block
     return 0;
   };
   std::any VisitorImpl::visitExpStmt(SysYParser::ExpStmtContext *context)
-  { // TODO
+  { // TODO Add this instruction to current basic block
     return 0;
   };
   std::any VisitorImpl::visitBlockStmt(SysYParser::BlockStmtContext *context)
-  { 
+  {
+    // Do nothing, just accept.
     context->block()->accept(this);
     return 0;
   };
   std::any VisitorImpl::visitIfStmt(SysYParser::IfStmtContext *context)
-  { 
+  {
     ctx_.symbolTable->pushScope("if");
-    auto bb = std::make_shared<ir::BasicBlock>("_" + ctx_.currentFunction->getName() + "_if_" + std::to_string(ctx_.basicBlockCounter.next()));
+    auto true_bb_name= "_" + ctx_.currentFunction->getName() + "_if_" + std::to_string(ctx_.basicBlockCounter.next());
+    auto exit_bb_name = "_" + ctx_.currentFunction->getName() + "_if_exit_" + std::to_string(ctx_.basicBlockCounter.next());
+    auto bb = std::make_shared<ir::BasicBlock>(true_bb_name, ir::BasicBlock::BlockType::IfTrue);
     ctx_.currentFunction->addBasicBlock(bb);
+    ctx_.entryBasicBlock = ctx_.currentBasicBlock;
+    ctx_.currentBasicBlock = bb;
+    auto exit_bb = std::make_shared<ir::BasicBlock>(exit_bb_name, ir::BasicBlock::BlockType::Default);
+    ctx_.exitBasicBlock = exit_bb;
 
     context->stmt()->accept(this);
 
     ctx_.symbolTable->popScope();
+    ctx_.entryBasicBlock = ctx_.currentBasicBlock;
+    ctx_.currentBasicBlock = exit_bb;
+    ctx_.currentFunction->addBasicBlock(exit_bb);
     return 0;
   };
   std::any VisitorImpl::visitIfElseStmt(SysYParser::IfElseStmtContext *context)
-  { 
+  {
     ctx_.symbolTable->pushScope("if");
-    auto bbt = std::make_shared<ir::BasicBlock>("_" + ctx_.currentFunction->getName() + "_if_" + std::to_string(ctx_.basicBlockCounter.next()));
+    auto true_bb_name = "_" + ctx_.currentFunction->getName() + "_if_" + std::to_string(ctx_.basicBlockCounter.next());
+    auto false_bb_name = "_" + ctx_.currentFunction->getName() + "_if_" + std::to_string(ctx_.basicBlockCounter.next());
+    auto exit_bb_name = "_" + ctx_.currentFunction->getName() + "_if_exit_" + std::to_string(ctx_.basicBlockCounter.next());
+    auto bbt = std::make_shared<ir::BasicBlock>(true_bb_name, ir::BasicBlock::BlockType::IfTrue);
     ctx_.currentFunction->addBasicBlock(bbt);
+    ctx_.entryBasicBlock = ctx_.currentBasicBlock;
+    ctx_.currentBasicBlock = bbt;
+    auto exit_bb = std::make_shared<ir::BasicBlock>(exit_bb_name, ir::BasicBlock::BlockType::Default);
 
     context->stmt(0)->accept(this);
 
     ctx_.symbolTable->popScope();
 
     ctx_.symbolTable->pushScope("else");
-    auto bbf = std::make_shared<ir::BasicBlock>("_" + ctx_.currentFunction->getName() + "_else_" + std::to_string(ctx_.basicBlockCounter.next()));
+    int bbfCount = ctx_.basicBlockCounter.next();
+    auto bbf = std::make_shared<ir::BasicBlock>(false_bb_name, ir::BasicBlock::BlockType::IfFalse);
     ctx_.currentFunction->addBasicBlock(bbf);
+    ctx_.currentBasicBlock = bbf;
 
     context->stmt(1)->accept(this);
 
     ctx_.symbolTable->popScope();
+    ctx_.entryBasicBlock = ctx_.currentBasicBlock;
+    ctx_.currentBasicBlock = exit_bb;
+    ctx_.currentFunction->addBasicBlock(exit_bb);
     return 0;
   };
   std::any VisitorImpl::visitWhileStmt(SysYParser::WhileStmtContext *context)
-  { // TODO
+  {
+    ctx_.symbolTable->pushScope("while");
+    auto entry_bb_name = "_" + ctx_.currentFunction->getName() + "_while_" + std::to_string(ctx_.basicBlockCounter.next());
+    auto exit_bb_name = "_" + ctx_.currentFunction->getName() + "_while_exit_" + std::to_string(ctx_.basicBlockCounter.next());
+    auto bb = std::make_shared<ir::BasicBlock>(entry_bb_name, ir::BasicBlock::BlockType::WhileEntry);
+    ctx_.currentFunction->addBasicBlock(bb);
+    ctx_.entryBasicBlock = ctx_.currentBasicBlock;
+    ctx_.currentBasicBlock = bb;
+    auto exit_bb = std::make_shared<ir::BasicBlock>(exit_bb_name, ir::BasicBlock::BlockType::Default);
+    ctx_.exitBasicBlock = exit_bb;
+
+    context->stmt()->accept(this);
+
+    ctx_.symbolTable->popScope();
+    ctx_.entryBasicBlock = ctx_.currentBasicBlock;
+    ctx_.currentBasicBlock = exit_bb;
+    ctx_.currentFunction->addBasicBlock(exit_bb);
     return 0;
   };
   std::any VisitorImpl::visitBreakStmt(SysYParser::BreakStmtContext *context)
-  { // TODO
+  { // TODO Jump to exit basic block
     return 0;
   };
   std::any VisitorImpl::visitContinueStmt(SysYParser::ContinueStmtContext *context)
-  { // TODO
+  { // TODO Jump to loop entry basic block
     return 0;
   };
   std::any VisitorImpl::visitReturnStmt(SysYParser::ReturnStmtContext *context)
-  { // TODO
+  { // TODO Just add this instruction to current basic block
     return 0;
   };
   std::any VisitorImpl::visitExp(SysYParser::ExpContext *context)
@@ -433,7 +481,7 @@ namespace front
   };
   //* @return ir::Constant
   std::any VisitorImpl::visitConstExp(SysYParser::ConstExpContext *context)
-  { 
+  {
     auto constant = std::make_shared<ir::Constant>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), "Int", int32_t(2));
     return constant;
   };
