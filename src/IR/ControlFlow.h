@@ -46,7 +46,7 @@ namespace ir
   {
   public:
     Function(std::shared_ptr<Type> type, std::string name)
-        : User(std::move(type), std::move(name)){ is_function_ = true; };
+        : User(std::move(type), std::move(name)) { is_function_ = true; };
     std::string dump(DumpHelper &helper) const override
     {
       std::string output = "Function " + getName() + ": " + getType()->dump();
@@ -81,7 +81,9 @@ namespace ir
   {
   public:
     Return(std::shared_ptr<Value> retVal, std::string name)
-        : Instruction(std::move(retVal->getType()), std::move(name), 1), ret_val_(retVal, this){};
+        : Instruction(std::move(retVal->getType()), std::move(name), 1), ret_val_(retVal, this){
+          is_terminate_inst_ = true;
+        };
 
   protected:
     Use ret_val_;
@@ -145,7 +147,9 @@ namespace ir
   {
   public:
     Br(std::shared_ptr<Value> condition, std::string name)
-        : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name), 3), condition_(condition, this){};
+        : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name), 3), condition_(condition, this){
+          is_terminate_inst_ = true;
+        };
     std::string dump(DumpHelper &helper) const override
     {
       std::string output = "Branch " + getName() + " ";
@@ -190,7 +194,10 @@ namespace ir
   {
   public:
     Jump(std::shared_ptr<BasicBlock> target, std::string name)
-        : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name), 1), target_(target){};
+        : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name), 1), target_(target)
+    {
+      is_terminate_inst_ = true;
+    };
     void setTarget(std::shared_ptr<BasicBlock> target)
     {
       target_ = target;

@@ -32,7 +32,6 @@ namespace front
     std::shared_ptr<ir::BasicBlock> currentBasicBlock;
     std::shared_ptr<ir::BasicBlock> exitBasicBlock;
     utils::Counter basicBlockCounter = utils::Counter(0);
-    utils::Counter registerFFCounter = utils::Counter(0); // registers for current function
 
     std::shared_ptr<ir::Allocate> returnAllocate;
   };

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <string>
 
 #include "Instruction.h"
@@ -65,6 +66,24 @@ namespace ir
     {
       return block_type_;
     }
+
+    std::optional<std::shared_ptr<Instruction>> getTerminator()
+    {
+      if (instructions_.empty())
+      {
+        return std::nullopt;
+      }
+      auto last = std::dynamic_pointer_cast<Instruction>(instructions_.back().getValue());
+      if (last->isTerminator())
+      {
+        return last;
+      }
+      else
+      {
+        return std::nullopt;
+      }
+    }
+
   protected:
     std::vector<Use> instructions_;
     BlockType block_type_;

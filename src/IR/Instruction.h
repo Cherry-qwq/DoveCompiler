@@ -17,11 +17,12 @@ namespace ir
     void setParent(std::shared_ptr<BasicBlock> parent) { parent_ = parent; };
     std::shared_ptr<BasicBlock> getParent() { return parent_; };
 
-
+    bool isTerminator() { return is_terminate_inst_; };
 
   protected:
     unsigned numOps_;
     std::shared_ptr<BasicBlock> parent_;
+    bool is_terminate_inst_ = false;
     std::vector<Use> operands_ = std::vector<Use>();
   };
 }
