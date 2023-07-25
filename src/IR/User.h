@@ -20,9 +20,13 @@ namespace ir
     {
       return is_allocate_;
     }
-
+    bool isFunction() const
+    {
+      return is_function_;
+    }
   protected:
     bool is_constant_;
     bool is_allocate_;
+    bool is_function_;
   };
 }

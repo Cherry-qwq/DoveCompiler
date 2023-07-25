@@ -46,7 +46,7 @@ namespace ir
   {
   public:
     Function(std::shared_ptr<Type> type, std::string name)
-        : User(std::move(type), std::move(name)){};
+        : User(std::move(type), std::move(name)){ is_function_ = true; };
     std::string dump(DumpHelper &helper) const override
     {
       std::string output = "Function " + getName() + ": " + getType()->dump();
