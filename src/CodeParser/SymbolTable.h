@@ -6,7 +6,7 @@
 #include <stack>
 #include <optional>
 
-#include "IR/Operands.h"
+#include "IR/MemoryAccess.h"
 
 namespace front
 {
