@@ -72,6 +72,23 @@ namespace ir
         return "Unknown";
       }
     }
+
+    bool isInt() const
+    {
+      return type_ == TypeID::Int32;
+    }
+    bool isFloat() const
+    {
+      return type_ == TypeID::Float32;
+    }
+    bool isBool() const
+    {
+      return type_ == TypeID::Boolean;
+    }
+    bool isVoid() const
+    {
+      return type_ == TypeID::Void;
+    }
     size_t size() const
     {
       switch (type_)

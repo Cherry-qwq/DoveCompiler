@@ -3,17 +3,29 @@
 #include <memory>
 
 #include "Instruction.h"
-
+#include "Type.h"
 namespace ir
 {
   class Add : public Instruction
   {
-    // TODO
+  public:
+    explicit Add(std::shared_ptr<User> opleft, std::shared_ptr<User> opright, std::string name) : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name), 2)
+    {
+      setType(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32));
+      if (opleft->getType()->isPrimitive() && opright->getType()->isPrimitive())
+        if (std::dynamic_pointer_cast<PrimitiveDataType>(opleft->getType())->isInt() && std::dynamic_pointer_cast<PrimitiveDataType>(opright->getType())->isInt())
+        {
+          operands_.push_back(Use(opleft, this));
+          operands_.push_back(Use(opright, this));
+        }
+        else
+          throw std::runtime_error("Add: Invalid operand types");
+    };
+
   };
 
   class FAdd : public Instruction
   {
-    // TODO
   };
 
   class Sub : public Instruction

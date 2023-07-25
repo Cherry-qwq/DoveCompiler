@@ -16,15 +16,12 @@ namespace ir
 
     void setParent(std::shared_ptr<BasicBlock> parent) { parent_ = parent; };
     std::shared_ptr<BasicBlock> getParent() { return parent_; };
-    void setSTRegister(bool request_register) { request_register_ = request_register; };
-    bool getSTRegister() { return request_register_; };
-    void setRegName(std::string reg_name) { reg_name_ = reg_name; };
-    std::string getRegName() { return reg_name_; };
+
+
 
   protected:
     unsigned numOps_;
     std::shared_ptr<BasicBlock> parent_;
-    bool request_register_ = true;
-    std::string reg_name_;
+    std::vector<Use> operands_ = std::vector<Use>();
   };
 }

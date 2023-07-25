@@ -40,7 +40,6 @@ namespace ir
       return "Unknown";
     };
     std::string getLabel = "label_" + getName();
-
     std::string dump(DumpHelper &helper) const override
     {
       auto s = "BasicBlock " + getName() + ": " + getStringifyBlockType();
@@ -53,7 +52,6 @@ namespace ir
       helper.unindent();
       return s;
     };
-
     void addInstruction(std::shared_ptr<Instruction> inst)
     {
       inst->setParent(shared_from_this());
@@ -63,12 +61,10 @@ namespace ir
     {
       return instructions_;
     }
-
     BlockType getBlockType() const
     {
       return block_type_;
     }
-
   protected:
     std::vector<Use> instructions_;
     BlockType block_type_;

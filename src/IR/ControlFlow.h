@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <map>
 
 #include "BasicBlock.h"
 #include "Instruction.h"
@@ -58,12 +59,10 @@ namespace ir
       helper.unindent();
       return output;
     }
-
     void addBasicBlock(std::shared_ptr<BasicBlock> basic_block)
     {
       basic_blocks_.push_back(std::move(basic_block));
     }
-
     std::shared_ptr<std::vector<std::shared_ptr<BasicBlock>>> getBasicBlocks()
     {
       return std::make_shared<std::vector<std::shared_ptr<BasicBlock>>>(basic_blocks_);
@@ -78,10 +77,74 @@ namespace ir
     // TODO
   };
 
-  class Branch : public Instruction
+  class Return : public Instruction
   {
   public:
-    Branch(std::shared_ptr<Value> condition, std::string name)
+    Return(std::shared_ptr<Value> retVal, std::string name)
+        : Instruction(std::move(retVal->getType()), std::move(name), 1), ret_val_(retVal, this){};
+
+  protected:
+    Use ret_val_;
+  };
+
+  class JPLabel : public Instruction
+  {
+  public:
+    explicit JPLabel(std::string label_name) : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), label_name, 0), label_name_(label_name){};
+    std::string dump(DumpHelper &helper) const override
+    {
+      std::string output = "JPLabel " + getName() + ": ";
+      helper.add(output);
+      return output;
+    }
+
+  protected:
+    std::string label_name_;
+  };
+
+  class Label : public Instruction
+  {
+  public:
+    explicit Label(std::shared_ptr<JPLabel> jplabel) : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), jplabel->getName(), 0), jplabel_(jplabel){};
+    std::string dump(DumpHelper &helper) const override
+    {
+      std::string output = "Label " + getName() + ": ";
+      helper.add(output);
+      return output;
+    }
+
+  protected:
+    std::shared_ptr<JPLabel> jplabel_;
+  };
+
+  class Phi : public Instruction
+  {
+    // TODO
+  protected:
+    std::map<std::shared_ptr<JPLabel>, std::shared_ptr<Value>> vecPair;
+  };
+
+  class Call : public Instruction
+  {
+  public:
+    explicit Call(std::shared_ptr<Function> callee, std::string name) : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name), 2), callee_(callee){};
+    explicit Call(std::shared_ptr<Function> callee, std::vector<std::shared_ptr<Value>> args, std::string name) : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name), 2), callee_(callee)
+    {
+      for (auto &arg : args)
+      {
+        args_.push_back(Use(arg, this));
+      }
+    };
+
+  protected:
+    std::shared_ptr<Function> callee_;
+    std::vector<Use> args_ = std::vector<Use>();
+  };
+
+  class Br : public Instruction
+  {
+  public:
+    Br(std::shared_ptr<Value> condition, std::string name)
         : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name), 3), condition_(condition, this){};
     std::string dump(DumpHelper &helper) const override
     {
@@ -141,23 +204,4 @@ namespace ir
     std::shared_ptr<BasicBlock> target_;
   };
 
-  class Return : public Instruction
-  {
-  public:
-    Return(std::shared_ptr<Value> retVal, std::string name)
-        : Instruction(std::move(retVal->getType()), std::move(name), 1), ret_val_(retVal, this){};
-
-  protected:
-    Use ret_val_;
-  };
-
-  class Phi : public Instruction
-  {
-    // TODO
-  };
-
-  class Call : public Instruction
-  {
-    // TODO
-  };
 }
