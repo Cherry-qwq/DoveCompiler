@@ -1,4 +1,4 @@
-int b, a[2], c[3][4];
+int b, a[2+1], c[3][4];
 int g(){
   if(true){
     if(true){
