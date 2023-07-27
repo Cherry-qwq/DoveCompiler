@@ -87,7 +87,7 @@ namespace ir
   public:
     explicit FMul(std::shared_ptr<User> opleft, std::shared_ptr<User> opright, std::string name) : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name), 2)
     {
-      setType(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Float32)
+      setType(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Float32);
       if (opleft->getType()->isPrimitive() && opright->getType()->isPrimitive())
         if (std::dynamic_pointer_cast<PrimitiveDataType>(opleft->getType())->isFloat() || std::dynamic_pointer_cast<PrimitiveDataType>(opright->getType())->isFloat())
         {
