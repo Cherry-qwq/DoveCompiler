@@ -2,6 +2,7 @@
 
 #include "VisitorImpl.h"
 #include "Utils/Utils.h"
+#include "IR/Operators.h"
 namespace front
 {
 
@@ -62,6 +63,44 @@ namespace front
   std::any VisitorImpl::visitUnaryOpExp(SysYParser::UnaryOpExpContext *context)
   {
     auto unaryOp = std::any_cast<char>(context->unaryOp()->accept(this));
+    auto right = std::any_cast<std::shared_ptr<ir::Instruction>>(context->unaryExp()->accept(this));
+    switch (unaryOp)
+    {
+    case '+':
+    {
+      if (right->getType()->isPrimitive())
+      {
+        auto prim_type = std::dynamic_pointer_cast<ir::PrimitiveDataType>(right->getType());
+        if (prim_type->isInt())
+        {
+          auto left = std::make_shared<ir::Constant>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), "Int", int32_t(0));
+          auto add = std::make_shared<ir::Add>(left, right, "add");
+          return add;
+        }
+        else if (prim_type->isFloat())
+        {
+          auto left = std::make_shared<ir::Constant>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Float32), "Float", float(0));
+          auto fadd = std::make_shared<ir::FAdd>(left, right, "fadd");
+          return fadd;
+        }
+      }
+      throw std::runtime_error("Add: Invalid operand types");
+      break;
+    }
+    case '-':
+    {
+      break;
+    }
+    case '!':
+    {
+      break;
+    }
+    default:
+    {
+      return right;
+      break;
+    }
+    }
     return 0;
   };
   std::any VisitorImpl::visitUnaryOp(SysYParser::UnaryOpContext *context)

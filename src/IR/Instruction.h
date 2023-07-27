@@ -19,6 +19,11 @@ namespace ir
 
     bool isTerminator() { return is_terminate_inst_; };
 
+    //ControlFlow
+    //Operators
+    //MemoryAccess
+
+
   protected:
     unsigned numOps_;
     std::shared_ptr<BasicBlock> parent_;

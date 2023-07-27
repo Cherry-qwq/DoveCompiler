@@ -12,7 +12,8 @@ namespace ir
   {
   public:
     explicit User(std::shared_ptr<Type> type, std::string name = "") : Value(type, name){};
-     bool isConstant() const
+
+    bool isConstant() const
     {
       return is_constant_;
     }
@@ -24,9 +25,13 @@ namespace ir
     {
       return is_function_;
     }
+  
+    
   protected:
     bool is_constant_;
     bool is_allocate_;
     bool is_function_;
+
+    
   };
 }
