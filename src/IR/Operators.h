@@ -53,7 +53,7 @@ namespace ir
     {
       setType(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Float32));
       if (opleft->getType()->isPrimitive() && opright->getType()->isPrimitive())
-        if (std::dynamic_pointer_cast<PrimitiveDataType>(opleft->getType())->isFloat() || std::dynamic_pointer_cast<PrimitiveDataType>(opright->getType())->isFloat())
+        if (std::dynamic_pointer_cast<PrimitiveDataType>(opleft->getType())->isFloat() && std::dynamic_pointer_cast<PrimitiveDataType>(opright->getType())->isFloat())
         {
           operands_.push_back(Use(opleft, this));
           operands_.push_back(Use(opright, this));
@@ -89,7 +89,7 @@ namespace ir
     {
       setType(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Float32);
       if (opleft->getType()->isPrimitive() && opright->getType()->isPrimitive())
-        if (std::dynamic_pointer_cast<PrimitiveDataType>(opleft->getType())->isFloat() || std::dynamic_pointer_cast<PrimitiveDataType>(opright->getType())->isFloat())
+        if (std::dynamic_pointer_cast<PrimitiveDataType>(opleft->getType())->isFloat() && std::dynamic_pointer_cast<PrimitiveDataType>(opright->getType())->isFloat())
         {
           operands_.push_back(Use(opleft, this));
           operands_.push_back(Use(opright, this));
