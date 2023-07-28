@@ -87,7 +87,7 @@ namespace ir
   public:
     explicit FMul(std::shared_ptr<User> opleft, std::shared_ptr<User> opright, std::string name) : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name), 2)
     {
-      setType(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Float32);
+      setType(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Float32));
       if (opleft->getType()->isPrimitive() && opright->getType()->isPrimitive())
         if (std::dynamic_pointer_cast<PrimitiveDataType>(opleft->getType())->isFloat() && std::dynamic_pointer_cast<PrimitiveDataType>(opright->getType())->isFloat())
         {
@@ -118,15 +118,55 @@ namespace ir
   class URem : public Instruction
   {
     // TODO
+    public:
+    explicit URem(std::shared_ptr<User> opleft, std::shared_ptr<User> opright, std::string name) : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name), 2)
+    {
+      setType(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32));
+      if (opleft->getType()->isPrimitive() && opright->getType()->isPrimitive())
+        if (std::dynamic_pointer_cast<PrimitiveDataType>(opleft->getType())->isInt() && std::dynamic_pointer_cast<PrimitiveDataType>(opright->getType())->isInt())
+        {
+          operands_.push_back(Use(opleft, this));
+          operands_.push_back(Use(opright, this));
+        }
+        else
+          throw std::runtime_error("URem: Invalid operand types");
+    };
+
   };
 
   class SRem : public Instruction
   {
     // TODO
+    public:
+    explicit SRem(std::shared_ptr<User> opleft, std::shared_ptr<User> opright, std::string name) : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name), 2)
+    {
+      setType(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32));
+      if (opleft->getType()->isPrimitive() && opright->getType()->isPrimitive())
+        if (std::dynamic_pointer_cast<PrimitiveDataType>(opleft->getType())->isInt() && std::dynamic_pointer_cast<PrimitiveDataType>(opright->getType())->isInt())
+        {
+          operands_.push_back(Use(opleft, this));
+          operands_.push_back(Use(opright, this));
+        }
+        else
+          throw std::runtime_error("SRem: Invalid operand types");
+    };
   };
 
   class FRem : public Instruction
   {
     // TODO
+    public:
+    explicit FRem(std::shared_ptr<User> opleft, std::shared_ptr<User> opright, std::string name) : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name), 2)
+    {
+      setType(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Float32));
+      if (opleft->getType()->isPrimitive() && opright->getType()->isPrimitive())
+        if (std::dynamic_pointer_cast<PrimitiveDataType>(opleft->getType())->isFloat() && std::dynamic_pointer_cast<PrimitiveDataType>(opright->getType())->isFloat())
+        {
+          operands_.push_back(Use(opleft, this));
+          operands_.push_back(Use(opright, this));
+        }
+        else
+          throw std::runtime_error("FRem: Invalid operand types");
+    };
   };
 }
