@@ -30,7 +30,7 @@ namespace ir
       std::string output = "Add " + getName() + " = " + operands_[0].getValue()->getName() + " + " + operands_[1].getValue()->getName();
       helper.add(output);
       return output;
-    }
+    };
   };
 
   class FAdd : public Instruction
@@ -57,7 +57,7 @@ namespace ir
       std::string output = "FAdd " + getName() + " = " + operands_[0].getValue()->getName() + " + " + operands_[1].getValue()->getName();
       helper.add(output);
       return output;
-    }
+    };
   };
 
   class Sub : public Instruction
@@ -75,7 +75,12 @@ namespace ir
         else
           throw std::runtime_error("Sub: Invalid operand types");
     };
-
+    std::string dump(DumpHelper &helper) const override
+    {
+      std::string output = "Sub " + getName() + " = " + operands_[0].getValue()->getName() + " - " + operands_[1].getValue()->getName();
+      helper.add(output);
+      return output;
+    };
   };
 
   class FSub : public Instruction
@@ -93,7 +98,12 @@ namespace ir
         else
           throw std::runtime_error("FSub: Invalid operand types");
     };
-   // TODO
+    std::string dump(DumpHelper &helper) const override
+    {
+      std::string output = "FSub " + getName() + " = " + operands_[0].getValue()->getName() + " - " + operands_[1].getValue()->getName();
+      helper.add(output);
+      return output;
+    };
   };
 
   class Mul : public Instruction
@@ -111,7 +121,12 @@ namespace ir
         else
           throw std::runtime_error("Mul: Invalid operand types");
     };
-
+    std::string dump(DumpHelper &helper) const override
+    {
+      std::string output = "Mul " + getName() + " = " + operands_[0].getValue()->getName() + " * " + operands_[1].getValue()->getName();
+      helper.add(output);
+      return output;
+    };
   };
 
   class FMul : public Instruction
@@ -129,28 +144,86 @@ namespace ir
         else
           throw std::runtime_error("FMul: Invalid operand types");
     };
-    
+    std::string dump(DumpHelper &helper) const override
+    {
+      std::string output = "FMul " + getName() + " = " + operands_[0].getValue()->getName() + " * " + operands_[1].getValue()->getName();
+      helper.add(output);
+      return output;
+    };
   };
 
   class UDiv : public Instruction
   {
-    // TODO
+  public:
+    explicit UDiv(std::shared_ptr<User> opleft, std::shared_ptr<User> opright, std::string name) : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name), 2)
+    {
+      setType(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32));
+      if (opleft->getType()->isPrimitive() && opright->getType()->isPrimitive())
+        if (std::dynamic_pointer_cast<PrimitiveDataType>(opleft->getType())->isInt() && std::dynamic_pointer_cast<PrimitiveDataType>(opright->getType())->isInt())
+        {
+          operands_.push_back(Use(opleft, this));
+          operands_.push_back(Use(opright, this));
+        }
+        else
+          throw std::runtime_error("UDiv: Invalid operand types");
+    };
+    std::string dump(DumpHelper &helper) const override
+    {
+      std::string output = "UDiv " + getName() + " = " + operands_[0].getValue()->getName() + " / " + operands_[1].getValue()->getName();
+      helper.add(output);
+      return output;
+    };
   };
 
   class SDiv : public Instruction
   {
-    // TODO
+  public:
+    explicit SDiv(std::shared_ptr<User> opleft, std::shared_ptr<User> opright, std::string name) : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name), 2)
+    {
+      setType(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32));
+      if (opleft->getType()->isPrimitive() && opright->getType()->isPrimitive())
+        if (std::dynamic_pointer_cast<PrimitiveDataType>(opleft->getType())->isInt() && std::dynamic_pointer_cast<PrimitiveDataType>(opright->getType())->isInt())
+        {
+          operands_.push_back(Use(opleft, this));
+          operands_.push_back(Use(opright, this));
+        }
+        else
+          throw std::runtime_error("SDiv: Invalid operand types");
+    };
+    std::string dump(DumpHelper &helper) const override
+    {
+      std::string output = "SDiv " + getName() + " = " + operands_[0].getValue()->getName() + " / " + operands_[1].getValue()->getName();
+      helper.add(output);
+      return output;
+    };
   };
 
   class FDiv : public Instruction
   {
-    // TODO
+  public:
+    explicit FDiv(std::shared_ptr<User> opleft, std::shared_ptr<User> opright, std::string name) : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name), 2)
+    {
+      setType(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Float32));
+      if (opleft->getType()->isPrimitive() && opright->getType()->isPrimitive())
+        if (std::dynamic_pointer_cast<PrimitiveDataType>(opleft->getType())->isFloat() && std::dynamic_pointer_cast<PrimitiveDataType>(opright->getType())->isFloat())
+        {
+          operands_.push_back(Use(opleft, this));
+          operands_.push_back(Use(opright, this));
+        }
+        else
+          throw std::runtime_error("FDiv: Invalid operand types");
+    };
+    std::string dump(DumpHelper &helper) const override
+    {
+      std::string output = "FDiv " + getName() + " = " + operands_[0].getValue()->getName() + " / " + operands_[1].getValue()->getName();
+      helper.add(output);
+      return output;
+    };
   };
 
   class URem : public Instruction
   {
-    // TODO
-    public:
+  public:
     explicit URem(std::shared_ptr<User> opleft, std::shared_ptr<User> opright, std::string name) : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name), 2)
     {
       setType(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32));
@@ -163,13 +236,17 @@ namespace ir
         else
           throw std::runtime_error("URem: Invalid operand types");
     };
-
+    std::string dump(DumpHelper &helper) const override
+    {
+      std::string output = "URem " + getName() + " = " + operands_[0].getValue()->getName() + " % " + operands_[1].getValue()->getName();
+      helper.add(output);
+      return output;
+    };
   };
 
   class SRem : public Instruction
   {
-    // TODO
-    public:
+  public:
     explicit SRem(std::shared_ptr<User> opleft, std::shared_ptr<User> opright, std::string name) : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name), 2)
     {
       setType(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32));
@@ -182,12 +259,17 @@ namespace ir
         else
           throw std::runtime_error("SRem: Invalid operand types");
     };
+    std::string dump(DumpHelper &helper) const override
+    {
+      std::string output = "SRem " + getName() + " = " + operands_[0].getValue()->getName() + " % " + operands_[1].getValue()->getName();
+      helper.add(output);
+      return output;
+    };
   };
 
   class FRem : public Instruction
   {
-    // TODO
-    public:
+  public:
     explicit FRem(std::shared_ptr<User> opleft, std::shared_ptr<User> opright, std::string name) : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name), 2)
     {
       setType(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Float32));
@@ -200,5 +282,12 @@ namespace ir
         else
           throw std::runtime_error("FRem: Invalid operand types");
     };
+    std::string dump(DumpHelper &helper) const override
+    {
+      std::string output = "FRem " + getName() + " = " + operands_[0].getValue()->getName() + " % " + operands_[1].getValue()->getName();
+      helper.add(output);
+      return output;
+    };
   };
+
 }
