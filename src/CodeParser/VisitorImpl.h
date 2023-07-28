@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <variant>
 #include <memory>
+#include <stack>
 
 #include <antlr4-runtime.h>
 #include <SysYParser.h>
@@ -31,6 +32,10 @@ namespace front
     std::shared_ptr<ir::BasicBlock> entryBasicBlock;
     std::shared_ptr<ir::BasicBlock> currentBasicBlock;
     std::shared_ptr<ir::BasicBlock> exitBasicBlock;
+
+    std::stack<std::shared_ptr<ir::BasicBlock>> breakBBStack;
+    std::stack<std::shared_ptr<ir::BasicBlock>> continueBBStack;
+
     utils::Counter basicBlockCounter = utils::Counter(0);
 
     std::shared_ptr<ir::Allocate> returnAllocate;

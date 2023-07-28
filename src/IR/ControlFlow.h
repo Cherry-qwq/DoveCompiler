@@ -81,9 +81,10 @@ namespace ir
   {
   public:
     Return(std::shared_ptr<Value> retVal, std::string name)
-        : Instruction(std::move(retVal->getType()), std::move(name), 1), ret_val_(retVal, this){
-          is_terminate_inst_ = true;
-        };
+        : Instruction(std::move(retVal->getType()), std::move(name), 1), ret_val_(retVal, this)
+    {
+      is_terminate_inst_ = true;
+    };
 
   protected:
     Use ret_val_;
@@ -146,10 +147,14 @@ namespace ir
   class Br : public Instruction
   {
   public:
-    Br(std::shared_ptr<Value> condition, std::string name)
-        : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name), 3), condition_(condition, this){
-          is_terminate_inst_ = true;
-        };
+    Br(std::shared_ptr<Value> condition, Label t_label, Label f_label, std::string name) : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name), 1), condition_(condition, this), t_label_(t_label), f_label_(f_label)
+    {
+      is_terminate_inst_ = true;
+    };
+    Br(std::shared_ptr<Label> t_label, std::string name) : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name), 0), t_label_(t_label)
+    {
+      is_terminate_inst_ = true;
+    };
     std::string dump(DumpHelper &helper) const override
     {
       std::string output = "Branch " + getName() + " ";
@@ -159,56 +164,35 @@ namespace ir
       helper.unindent();
       return output;
     }
+    bool hasCondition()
+    {
+      return has_condition_;
+    }
     void setCondition(std::shared_ptr<Value> condition)
     {
       condition_ = Use(condition, this);
+      has_condition_ = true;
     }
     std::shared_ptr<Value> getCondition()
     {
       return condition_.getValue();
     }
-    void setTrueTarget(std::shared_ptr<BasicBlock> true_target)
+
+    std::shared_ptr<Label> getTLabel()
     {
-      true_target_ = true_target;
+      return t_label_;
     }
-    std::shared_ptr<BasicBlock> getTrueTarget(std::shared_ptr<BasicBlock> true_target)
+    std::shared_ptr<Label> getFLabel()
     {
-      return true_target_;
-    }
-    void setFalseTarget(std::shared_ptr<BasicBlock> false_target)
-    {
-      false_target_ = false_target;
-    }
-    std::shared_ptr<BasicBlock> getFalseTarget(std::shared_ptr<BasicBlock> false_target)
-    {
-      return false_target_;
+      return f_label_;
     }
 
   protected:
-    std::shared_ptr<BasicBlock> true_target_;
-    std::shared_ptr<BasicBlock> false_target_;
+    std::shared_ptr<Label> t_label_;
+    std::shared_ptr<Label> f_label_;
+
+    bool has_condition_ = false;
     Use condition_;
-  };
-
-  class Jump : public Instruction // Used in Break and Continue
-  {
-  public:
-    Jump(std::shared_ptr<BasicBlock> target, std::string name)
-        : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name), 1), target_(target)
-    {
-      is_terminate_inst_ = true;
-    };
-    void setTarget(std::shared_ptr<BasicBlock> target)
-    {
-      target_ = target;
-    }
-    std::shared_ptr<BasicBlock> getTarget()
-    {
-      return target_;
-    }
-
-  protected:
-    std::shared_ptr<BasicBlock> target_;
   };
 
 }

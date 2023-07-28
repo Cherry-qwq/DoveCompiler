@@ -18,11 +18,13 @@ namespace ir
       IfTrue,
       IfFalse,
       WhileEntry,
+      WhileBody
 
     };
 
     explicit BasicBlock(const std::string &name) : BasicBlock(name, BlockType::FunctionEntry){};
-    explicit BasicBlock(const std::string &name, BlockType type) : User(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name)), block_type_(type){};
+    explicit BasicBlock(const std::string &name, BlockType type) : BasicBlock(std::make_shared<JPLabel>(name), type){};
+    explicit BasicBlock(std::shared_ptr<JPLabel> jplabel, BlockType type) : User(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), jplabel->getName()), jplabel_(jplabel), block_type_(type){};
     std::string getStringifyBlockType() const
     {
       switch (block_type_)
@@ -37,10 +39,12 @@ namespace ir
         return "IfFalse";
       case BlockType::WhileEntry:
         return "WhileEntry";
+      case BlockType::WhileBody:
+        return "WhileBody";
       }
       return "Unknown";
     };
-    std::string getLabel = "label_" + getName();
+    std::string getLabel = jplabel_;
     std::string dump(DumpHelper &helper) const override
     {
       auto s = "BasicBlock " + getName() + ": " + getStringifyBlockType();
@@ -85,6 +89,7 @@ namespace ir
     }
 
   protected:
+    std::shared_ptr<JPLabel> jplabel_;
     std::vector<Use> instructions_;
     BlockType block_type_;
   };
