@@ -141,7 +141,7 @@ namespace front
   };
   std::any VisitorImpl::visitWhileStmt(SysYParser::WhileStmtContext *context)
   {
-    
+
     auto entry_jplabel = std::make_shared<ir::JPLabel>("_" + ctx_.currentFunction->getName() + "_while_entry_" + std::to_string(ctx_.basicBlockCounter.next()));
     auto body_jplabel = std::make_shared<ir::JPLabel>("_" + ctx_.currentFunction->getName() + "_while_body_" + std::to_string(ctx_.basicBlockCounter.next()));
     auto exit_jplabel = std::make_shared<ir::JPLabel>("_" + ctx_.currentFunction->getName() + "_while_exit_" + std::to_string(ctx_.basicBlockCounter.next()));
@@ -168,13 +168,13 @@ namespace front
     ctx_.currentFunction->addBasicBlock(exit_bb);
     ctx_.entryBasicBlock = ctx_.currentBasicBlock;
     ctx_.currentBasicBlock = exit_bb;
-    
+
     return 0;
   };
   std::any VisitorImpl::visitBreakStmt(SysYParser::BreakStmtContext *context)
-  { 
-    auto label = std::make_shared<ir::JPLabel>(ctx_.breakBBStack.top()->getLabel());
-    auto br = std::make_shared<ir::Br>(label, ctx_.currentBasicBlock);
+  {
+    auto label = std::make_shared<ir::Label>(ctx_.breakBBStack.top()->getLabel());
+    auto br = std::make_shared<ir::Br>(label, label->getName());
     ctx_.currentBasicBlock->addInstruction(br);
     return 0;
   };

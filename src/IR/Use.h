@@ -9,6 +9,7 @@ namespace ir
   class Use
   {
   public:
+    Use() : val_(nullptr), user_(nullptr) {}
     Use(std::shared_ptr<Value> val, User *user) : val_(val), user_(user) {}
     std::shared_ptr<Value> getValue() const { return val_; }
     void setValue(std::shared_ptr<Value> val) { val_ = val; }

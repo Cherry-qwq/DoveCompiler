@@ -5,11 +5,11 @@
 #include <string>
 #include <map>
 
-#include "BasicBlock.h"
 #include "Instruction.h"
 namespace ir
 {
 
+  class BasicBlock;
   class CompUnit : public User
   {
   public:
@@ -47,26 +47,9 @@ namespace ir
   public:
     Function(std::shared_ptr<Type> type, std::string name)
         : User(std::move(type), std::move(name)) { is_function_ = true; };
-    std::string dump(DumpHelper &helper) const override
-    {
-      std::string output = "Function " + getName() + ": " + getType()->dump();
-      helper.add(output);
-      helper.indent();
-      for (auto basic_block : basic_blocks_)
-      {
-        basic_block->dump(helper);
-      }
-      helper.unindent();
-      return output;
-    }
-    void addBasicBlock(std::shared_ptr<BasicBlock> basic_block)
-    {
-      basic_blocks_.push_back(std::move(basic_block));
-    }
-    std::shared_ptr<std::vector<std::shared_ptr<BasicBlock>>> getBasicBlocks()
-    {
-      return std::make_shared<std::vector<std::shared_ptr<BasicBlock>>>(basic_blocks_);
-    }
+    std::string dump(DumpHelper &helper) const override;
+    void addBasicBlock(std::shared_ptr<BasicBlock> basic_block);
+    std::shared_ptr<std::vector<std::shared_ptr<BasicBlock>>> getBasicBlocks();
 
   protected:
     std::vector<std::shared_ptr<BasicBlock>> basic_blocks_;
@@ -116,6 +99,10 @@ namespace ir
       return output;
     }
 
+    std::shared_ptr<JPLabel> getJPLabel()
+    {
+      return jplabel_;
+    }
   protected:
     std::shared_ptr<JPLabel> jplabel_;
   };
@@ -147,15 +134,15 @@ namespace ir
   class Br : public Instruction
   {
   public:
-    Br(std::shared_ptr<Value> condition, Label t_label, Label f_label, std::string name) : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name), 1), condition_(condition, this), t_label_(t_label), f_label_(f_label)
+    Br(std::shared_ptr<Value> condition, std::shared_ptr<Label> t_label, std::shared_ptr<Label> f_label, std::string name) : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name), 1), condition_(condition, this), t_label_(t_label, this), f_label_(f_label, this)
     {
       is_terminate_inst_ = true;
     };
-    Br(std::shared_ptr<Label> t_label, std::string name) : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name), 0), t_label_(t_label)
+    Br(std::shared_ptr<Label> t_label, std::string name) : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name), 0), t_label_(t_label, this)
     {
       is_terminate_inst_ = true;
     };
-    std::string dump(DumpHelper &helper) const override
+    std::string dump(DumpHelper &helper) const
     {
       std::string output = "Branch " + getName() + " ";
       helper.add(output);
@@ -180,19 +167,20 @@ namespace ir
 
     std::shared_ptr<Label> getTLabel()
     {
-      return t_label_;
+      return std::dynamic_pointer_cast<Label>(t_label_.getValue());
     }
     std::shared_ptr<Label> getFLabel()
     {
-      return f_label_;
+      return std::dynamic_pointer_cast<Label>(f_label_.getValue());
     }
 
   protected:
-    std::shared_ptr<Label> t_label_;
-    std::shared_ptr<Label> f_label_;
+  bool has_condition_ = false;
+    Use condition_ = Use();
+    Use t_label_ = Use();
+    Use f_label_ = Use();
 
-    bool has_condition_ = false;
-    Use condition_;
+    
   };
 
 }

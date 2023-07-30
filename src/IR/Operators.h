@@ -67,13 +67,17 @@ namespace ir
     {
       setType(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32));
       if (opleft->getType()->isPrimitive() && opright->getType()->isPrimitive())
+      {
         if (std::dynamic_pointer_cast<PrimitiveDataType>(opleft->getType())->isInt() && std::dynamic_pointer_cast<PrimitiveDataType>(opright->getType())->isInt())
         {
           operands_.push_back(Use(opleft, this));
           operands_.push_back(Use(opright, this));
         }
         else
+        {
           throw std::runtime_error("Sub: Invalid operand types");
+        }
+      }
     };
     std::string dump(DumpHelper &helper) const override
     {
@@ -90,13 +94,17 @@ namespace ir
     {
       setType(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Float32));
       if (opleft->getType()->isPrimitive() && opright->getType()->isPrimitive())
+      {
         if (std::dynamic_pointer_cast<PrimitiveDataType>(opleft->getType())->isFloat() && std::dynamic_pointer_cast<PrimitiveDataType>(opright->getType())->isFloat())
         {
           operands_.push_back(Use(opleft, this));
           operands_.push_back(Use(opright, this));
         }
         else
+        {
           throw std::runtime_error("FSub: Invalid operand types");
+        }
+      }
     };
     std::string dump(DumpHelper &helper) const override
     {
@@ -113,13 +121,17 @@ namespace ir
     {
       setType(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32));
       if (opleft->getType()->isPrimitive() && opright->getType()->isPrimitive())
+      {
         if (std::dynamic_pointer_cast<PrimitiveDataType>(opleft->getType())->isInt() && std::dynamic_pointer_cast<PrimitiveDataType>(opright->getType())->isInt())
         {
           operands_.push_back(Use(opleft, this));
           operands_.push_back(Use(opright, this));
         }
         else
+        {
           throw std::runtime_error("Mul: Invalid operand types");
+        }
+      }
     };
     std::string dump(DumpHelper &helper) const override
     {
@@ -136,13 +148,17 @@ namespace ir
     {
       setType(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Float32));
       if (opleft->getType()->isPrimitive() && opright->getType()->isPrimitive())
+      {
         if (std::dynamic_pointer_cast<PrimitiveDataType>(opleft->getType())->isFloat() && std::dynamic_pointer_cast<PrimitiveDataType>(opright->getType())->isFloat())
         {
           operands_.push_back(Use(opleft, this));
           operands_.push_back(Use(opright, this));
         }
         else
+        {
           throw std::runtime_error("FMul: Invalid operand types");
+        }
+      }
     };
     std::string dump(DumpHelper &helper) const override
     {
@@ -159,13 +175,17 @@ namespace ir
     {
       setType(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32));
       if (opleft->getType()->isPrimitive() && opright->getType()->isPrimitive())
+      {
         if (std::dynamic_pointer_cast<PrimitiveDataType>(opleft->getType())->isInt() && std::dynamic_pointer_cast<PrimitiveDataType>(opright->getType())->isInt())
         {
           operands_.push_back(Use(opleft, this));
           operands_.push_back(Use(opright, this));
         }
         else
+        {
           throw std::runtime_error("UDiv: Invalid operand types");
+        }
+      }
     };
     std::string dump(DumpHelper &helper) const override
     {
@@ -182,13 +202,17 @@ namespace ir
     {
       setType(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32));
       if (opleft->getType()->isPrimitive() && opright->getType()->isPrimitive())
+      {
         if (std::dynamic_pointer_cast<PrimitiveDataType>(opleft->getType())->isInt() && std::dynamic_pointer_cast<PrimitiveDataType>(opright->getType())->isInt())
         {
           operands_.push_back(Use(opleft, this));
           operands_.push_back(Use(opright, this));
         }
         else
+        {
           throw std::runtime_error("SDiv: Invalid operand types");
+        }
+      }
     };
     std::string dump(DumpHelper &helper) const override
     {
@@ -205,13 +229,17 @@ namespace ir
     {
       setType(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Float32));
       if (opleft->getType()->isPrimitive() && opright->getType()->isPrimitive())
+      {
         if (std::dynamic_pointer_cast<PrimitiveDataType>(opleft->getType())->isFloat() && std::dynamic_pointer_cast<PrimitiveDataType>(opright->getType())->isFloat())
         {
           operands_.push_back(Use(opleft, this));
           operands_.push_back(Use(opright, this));
         }
         else
+        {
           throw std::runtime_error("FDiv: Invalid operand types");
+        }
+      }
     };
     std::string dump(DumpHelper &helper) const override
     {
@@ -228,13 +256,17 @@ namespace ir
     {
       setType(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32));
       if (opleft->getType()->isPrimitive() && opright->getType()->isPrimitive())
+      {
         if (std::dynamic_pointer_cast<PrimitiveDataType>(opleft->getType())->isInt() && std::dynamic_pointer_cast<PrimitiveDataType>(opright->getType())->isInt())
         {
           operands_.push_back(Use(opleft, this));
           operands_.push_back(Use(opright, this));
         }
         else
+        {
           throw std::runtime_error("URem: Invalid operand types");
+        }
+      }
     };
     std::string dump(DumpHelper &helper) const override
     {
@@ -251,13 +283,17 @@ namespace ir
     {
       setType(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32));
       if (opleft->getType()->isPrimitive() && opright->getType()->isPrimitive())
+      {
         if (std::dynamic_pointer_cast<PrimitiveDataType>(opleft->getType())->isInt() && std::dynamic_pointer_cast<PrimitiveDataType>(opright->getType())->isInt())
         {
           operands_.push_back(Use(opleft, this));
           operands_.push_back(Use(opright, this));
         }
         else
+        {
           throw std::runtime_error("SRem: Invalid operand types");
+        }
+      }
     };
     std::string dump(DumpHelper &helper) const override
     {
@@ -274,13 +310,17 @@ namespace ir
     {
       setType(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Float32));
       if (opleft->getType()->isPrimitive() && opright->getType()->isPrimitive())
+      {
         if (std::dynamic_pointer_cast<PrimitiveDataType>(opleft->getType())->isFloat() && std::dynamic_pointer_cast<PrimitiveDataType>(opright->getType())->isFloat())
         {
           operands_.push_back(Use(opleft, this));
           operands_.push_back(Use(opright, this));
         }
         else
+        {
           throw std::runtime_error("FRem: Invalid operand types");
+        }
+      }
     };
     std::string dump(DumpHelper &helper) const override
     {

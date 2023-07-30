@@ -5,7 +5,7 @@
 #include <string>
 
 #include "Instruction.h"
-
+#include "ControlFlow.h"
 namespace ir
 {
   class BasicBlock : public User, std::enable_shared_from_this<BasicBlock>
@@ -44,7 +44,6 @@ namespace ir
       }
       return "Unknown";
     };
-    std::string getLabel = jplabel_;
     std::string dump(DumpHelper &helper) const override
     {
       auto s = "BasicBlock " + getName() + ": " + getStringifyBlockType();
@@ -57,6 +56,9 @@ namespace ir
       helper.unindent();
       return s;
     };
+
+    std::shared_ptr<JPLabel> getLabel();
+
     void addInstruction(std::shared_ptr<Instruction> inst)
     {
       inst->setParent(shared_from_this());
