@@ -18,19 +18,17 @@ namespace front
   public:
     Symbol(const Symbol &symbol) = default;
     Symbol(const std::string &name, std::shared_ptr<ir::Allocate> symbol)
-        : name_(name), allocate_(symbol){};
+        : name_(name), user_(symbol){};
     Symbol(const std::string &name, std::shared_ptr<ir::Constant> symbol)
-        : name_(name), constant_(symbol), is_constant_(true){};
+        : name_(name), user_(symbol), is_constant_(true){};
     ~Symbol() = default;
 
     std::string getName() { return name_; };
-    std::shared_ptr<ir::Allocate> getAllocate() { return allocate_; };
-    std::shared_ptr<ir::Constant> getConstant() { return constant_; };
-    bool isConstant() { return is_constant_; };
+    std::shared_ptr<ir::User> getUser() { return user_; };
+    bool isConstant() { return user_->isConstant(); };
   protected:
     std::string name_;
-    std::shared_ptr<ir::Allocate> allocate_;
-    std::shared_ptr<ir::Constant> constant_;
+    std::shared_ptr<ir::User> user_;
     std::shared_ptr<Scope> scope_;
     bool is_constant_ = false;
   };
@@ -61,7 +59,7 @@ namespace front
       return symbols_.erase(name);
     };
 
-    std::optional<std::reference_wrapper<std::shared_ptr<Symbol>>> getSymbol(const std::string name)
+    std::optional<std::shared_ptr<Symbol>> getSymbol(const std::string name)
     {
       auto current = symbols_.find(name);
       if (current != symbols_.end())
@@ -89,7 +87,7 @@ namespace front
 
     bool deleteSymbol(const std::string &name, bool recursive);
 
-    std::optional<std::reference_wrapper<std::shared_ptr<Symbol>>> getSymbol(const std::string &name, bool recursive);
+    std::optional<std::shared_ptr<Symbol>> getSymbol(const std::string &name, bool recursive);
 
     void pushScope(const std::string &name);
 

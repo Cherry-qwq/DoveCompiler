@@ -32,7 +32,7 @@ namespace front
     return true;
   }
 
-  std::optional<std::reference_wrapper<std::shared_ptr<Symbol>>> SymbolTable::getSymbol(const std::string &name, bool recursive = true)
+  std::optional<std::shared_ptr<Symbol>> SymbolTable::getSymbol(const std::string &name, bool recursive = true)
   {
     auto now_scope = scopes_.top();
     while (true)
