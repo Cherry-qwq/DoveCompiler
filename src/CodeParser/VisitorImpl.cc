@@ -143,6 +143,8 @@ namespace front
   };
   std::any VisitorImpl::visitInitVarDef(SysYParser::InitVarDefContext *context)
   {
+
+    //Different
     auto allocate = std::make_shared<ir::Allocate>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), context->Identifier()->getSymbol()->getText());
     std::shared_ptr<ir::Type> arr_type = MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32);
 
