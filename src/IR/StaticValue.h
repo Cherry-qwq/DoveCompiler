@@ -23,9 +23,9 @@ namespace ir
                 output += std::to_string(float_val_);
             else if (is_bool_)
                 output += std::to_string(bool_val_);
-            else
-                output += "null";
-            helper.add(output);
+            else if(is_array_)
+                for(auto val: array_vals_)
+                    output += val->dump(helper) + ", ";
             return output;
         }
 

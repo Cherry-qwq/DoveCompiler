@@ -11,10 +11,12 @@ namespace front
     {
         return context->addExp()->accept(this);
     };
+
     std::any VisitorImpl::visitCond(SysYParser::CondContext *context)
     { // TODO
         return 0;
     };
+
     std::any VisitorImpl::visitLVal(SysYParser::LValContext *context)
     {
         auto ident = context->Identifier()->getSymbol()->getText();
@@ -331,12 +333,12 @@ namespace front
                 if (left_prim->isInt() && right_prim->isInt())
                 {
                     auto add = std::make_shared<ir::Add>(left, right, "add");
-                    return add;
+                    return std::dynamic_pointer_cast<ir::User>(add);
                 }
                 else if (left_prim->isFloat() && right_prim->isFloat())
                 {
                     auto fadd = std::make_shared<ir::FAdd>(left, right, "fadd");
-                    return fadd;
+                    return std::dynamic_pointer_cast<ir::User>(fadd);
                 }
                 else
                 {
@@ -386,6 +388,6 @@ namespace front
         {
             return std::dynamic_pointer_cast<ir::StaticValue>(constExp);
         }
-        throw std::runtime_error("constExp is not a StaticValue");
+        throw std::runtime_error("constExp is not result in a StaticValue");
     };
 }
