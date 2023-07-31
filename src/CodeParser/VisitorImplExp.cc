@@ -1,4 +1,5 @@
 #include <vector>
+#include <iostream>
 
 #include "VisitorImpl.h"
 #include "Utils/Utils.h"
@@ -35,22 +36,21 @@ namespace front
     return context->number()->accept(this);
   };
   std::any VisitorImpl::visitNumber(SysYParser::NumberContext *context)
-  { // TODO
-    auto p = std::shared_ptr<ir::Value>();
+  {
     if (context->IntLiteral())
     {
       auto i = utils::ParseInt32(context->getText());
-      p = std::make_shared<ir::Constant>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), "Int", i);
-      // Constant(std::shared_ptr<Type> type, uint32_t val)
+      auto p = std::make_shared<ir::Constant>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), "Int", i);
+      return std::dynamic_pointer_cast<ir::User>(p);
     }
     else if (context->FloatLiteral())
     {
       auto i = utils::ParseFloat32(context->getText());
-      p = std::make_shared<ir::Constant>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Float32), "Float", i);
+      auto p = std::make_shared<ir::Constant>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Float32), "Float", i);
+      return std::dynamic_pointer_cast<ir::User>(p);
     }
-    // std::vector<std::shared_ptr<ir::Allocate>> allocates;
-
-    return p;
+    throw std::runtime_error("Unknown number type");
+    return 0;
   };
   std::any VisitorImpl::visitUnaryToPrimExp(SysYParser::UnaryToPrimExpContext *context)
   {
@@ -144,7 +144,72 @@ namespace front
     return context->mulExp()->accept(this);
   };
   std::any VisitorImpl::visitAddTwoExp(SysYParser::AddTwoExpContext *context)
-  { // TODO
+  {
+    char op = '\0';
+    if (context->Addition())
+    {
+      op = '+';
+    }
+    else if (context->Minus())
+    {
+      op = '-';
+    }
+
+    auto left = std::any_cast<std::shared_ptr<ir::User>>(context->addExp()->accept(this));
+    auto right = std::any_cast<std::shared_ptr<ir::User>>(context->mulExp()->accept(this));
+    std::cout << "visitAddTwoExp" << std::endl;
+    if (left->isConstant() && right->isConstant())
+    {
+      if (left->getType()->isPrimitive() && right->getType()->isPrimitive())
+      {
+
+        auto left_prim = std::dynamic_pointer_cast<ir::PrimitiveDataType>(left->getType());
+        auto right_prim = std::dynamic_pointer_cast<ir::PrimitiveDataType>(right->getType());
+        // Int32 add Int32
+        if (left_prim->isInt() && right_prim->isInt())
+        {
+          auto left_const = std::dynamic_pointer_cast<ir::Constant>(left);
+          auto right_const = std::dynamic_pointer_cast<ir::Constant>(right);
+          auto left_val = left_const->getIntVal();
+          auto right_val = right_const->getIntVal();
+          auto add = std::make_shared<ir::Constant>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), "Int", op == '+' ? left_val + right_val : left_val - right_val);
+          return std::dynamic_pointer_cast<ir::User>(add);
+          // Float32 add Float32
+        }
+        else if (left_prim->isFloat() && right_prim->isFloat())
+        {
+          auto left_const = std::dynamic_pointer_cast<ir::Constant>(left);
+          auto right_const = std::dynamic_pointer_cast<ir::Constant>(right);
+          auto left_val = left_const->getFloatVal();
+          auto right_val = right_const->getFloatVal();
+          auto add = std::make_shared<ir::Constant>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Float32), "Float", op == '+' ? left_val + right_val : left_val - right_val);
+          return add;
+        }
+        // pointer add Int ?
+      }
+    }
+    else
+    {
+      if (left->getType()->isPrimitive() && right->getType()->isPrimitive())
+      {
+        auto left_prim = std::dynamic_pointer_cast<ir::PrimitiveDataType>(left->getType());
+        auto right_prim = std::dynamic_pointer_cast<ir::PrimitiveDataType>(right->getType());
+        if (left_prim->isInt() && right_prim->isInt())
+        {
+          auto add = std::make_shared<ir::Add>(left, right, "add");
+          return add;
+        }
+        else if (left_prim->isFloat() && right_prim->isFloat())
+        {
+          auto fadd = std::make_shared<ir::FAdd>(left, right, "fadd");
+          return fadd;
+        }
+        else
+        {
+          // TODO
+        }
+      }
+    }
     return 0;
   };
   std::any VisitorImpl::visitRelToAddExp(SysYParser::RelToAddExpContext *context)
@@ -182,7 +247,11 @@ namespace front
   //* @return ir::Constant
   std::any VisitorImpl::visitConstExp(SysYParser::ConstExpContext *context)
   {
-    auto constant = std::make_shared<ir::Constant>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), "Int", int32_t(2));
-    return constant;
+    auto constExp = std::any_cast<std::shared_ptr<ir::User>>(context->addExp()->accept(this));
+    if (constExp->isConstant())
+    {
+      return std::dynamic_pointer_cast<ir::Constant>(constExp);
+    }
+    throw std::runtime_error("constExp is not a constant");
   };
 }
