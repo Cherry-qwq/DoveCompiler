@@ -132,9 +132,74 @@ namespace front
     return 0;
   };
   std::any VisitorImpl::visitMulTwoExp(SysYParser::MulTwoExpContext *context)
-  { // TODO
+  {
+    char op = '\0';
+    if (context->Multiplication())
+    {
+      op = '*';
+    }
+    else if (context->Division())
+    {
+      op = '/';
+    }
+    else if (context->Modulo())
+    {
+      op = '%';
+    }
+
+    auto left = std::any_cast<std::shared_ptr<ir::User>>(context->mulExp()->accept(this));
+    auto right = std::any_cast<std::shared_ptr<ir::User>>(context->unaryExp()->accept(this));
+    if (left->isConstant() && right->isConstant())
+    {
+      auto left_const = std::dynamic_pointer_cast<ir::Constant>(left);
+      auto right_const = std::dynamic_pointer_cast<ir::Constant>(right);
+      if (left_const->getType()->isPrimitive() && right_const->getType()->isPrimitive())
+      {
+        auto left_prim = std::dynamic_pointer_cast<ir::PrimitiveDataType>(left_const->getType());
+        auto right_prim = std::dynamic_pointer_cast<ir::PrimitiveDataType>(right_const->getType());
+        if (left_prim->isInt() && right_prim->isInt())
+        {
+          int32_t value = 0;
+          if (op == '*')
+          {
+            value = left_const->getIntVal() * right_const->getIntVal();
+          }
+          else if (op == '/')
+          {
+            value = left_const->getIntVal() / right_const->getIntVal();
+          }
+          else if (op == '%')
+          {
+            value = left_const->getIntVal() % right_const->getIntVal();
+          };
+          auto result = std::make_shared<ir::Constant>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), "Int", int32_t(value));
+          return std::dynamic_pointer_cast<ir::User>(result);
+        }
+        else if (left_prim->isFloat() && right_prim->isFloat())
+        {
+          float value = 0;
+          if (op == '*')
+          {
+            value = left_const->getFloatVal() * right_const->getFloatVal();
+          }
+          else if (op == '/')
+          {
+            value = left_const->getFloatVal() / right_const->getFloatVal();
+          }
+          else if (op == '%')
+          {
+            throw std::runtime_error("Float is not support modulo");
+          };
+          auto result = std::make_shared<ir::Constant>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Float32), "Float", float(value));
+          return std::dynamic_pointer_cast<ir::User>(result);
+        }
+      }
+    }
+
+    throw std::runtime_error("Mul: Invalid operand types");
     return 0;
   };
+
   std::any VisitorImpl::visitMulToUnaryExp(SysYParser::MulToUnaryExpContext *context)
   {
     return context->unaryExp()->accept(this);
@@ -157,7 +222,6 @@ namespace front
 
     auto left = std::any_cast<std::shared_ptr<ir::User>>(context->addExp()->accept(this));
     auto right = std::any_cast<std::shared_ptr<ir::User>>(context->mulExp()->accept(this));
-    std::cout << "visitAddTwoExp" << std::endl;
     if (left->isConstant() && right->isConstant())
     {
       if (left->getType()->isPrimitive() && right->getType()->isPrimitive())
@@ -183,7 +247,7 @@ namespace front
           auto left_val = left_const->getFloatVal();
           auto right_val = right_const->getFloatVal();
           auto add = std::make_shared<ir::Constant>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Float32), "Float", op == '+' ? left_val + right_val : left_val - right_val);
-          return add;
+          return std::dynamic_pointer_cast<ir::User>(add);
         }
         // pointer add Int ?
       }
