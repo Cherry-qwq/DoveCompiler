@@ -11,7 +11,7 @@
 
 #include "SymbolTable.h"
 #include "IR/BasicBlock.h"
-#include "IR/Operands.h"
+#include "IR/StaticValue.h"
 #include "IR/MemoryAccess.h"
 #include "IR/ControlFlow.h"
 #include "Utils/Counter.h"

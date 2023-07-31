@@ -8,6 +8,7 @@
 
 #include "Type.h"
 #include "Instruction.h"
+#include "StaticValue.h"
 
 namespace ir
 {
@@ -15,12 +16,14 @@ namespace ir
     class Allocate : public Instruction
     {
     public:
-        Allocate(std::shared_ptr<Type> type, std::string name) : Allocate(type, name, false, std::make_shared<StaticValue>(StaticValue(type, name, 0))) {}
-        Allocate(std::string name, bool is_const, std::shared_ptr<StaticValue> val) : Allocate(val->getType(), name, is_const, val) {}
-        Allocate(std::shared_ptr<Type> type, std::string name, bool is_const, std::shared_ptr<StaticValue> val) : Instruction(MakePointerType(type->copy()), std::move(name), 1), type_(std::move(type)), is_const_(is_const), staticvalue_(val) { is_allocate_ = true; };
+        Allocate(std::shared_ptr<Type> type, std::string name) : Allocate(type, name, false, false, std::make_shared<StaticValue>(StaticValue(type, name, 0))) {}
+        Allocate(std::string name, bool is_const, std::shared_ptr<StaticValue> val) : Allocate(val->getType(), name, is_const, false, val) {}
+        Allocate(std::shared_ptr<Type> type, std::string name, bool is_global) : Allocate(type, name, false, is_global, std::make_shared<StaticValue>(StaticValue(type, name, 0))) {}
+        Allocate(std::string name, bool is_const, bool is_global, std::shared_ptr<StaticValue> val) : Allocate(val->getType(), name, is_const, is_global, val) {}
+        Allocate(std::shared_ptr<Type> type, std::string name, bool is_const, bool is_global, std::shared_ptr<StaticValue> val) : Instruction(MakePointerType(type->copy()), std::move(name), 1), type_(std::move(type)), is_const_(is_const), is_global_(is_global), staticvalue_(val) { is_allocate_ = true; };
         std::string dump(DumpHelper &helper) const override
         {
-            std::string output = (is_const_ ? "Constant " : "Allocate ") + getName() + ": " + getType()->dump();
+            std::string output = (is_const_ ? "ConstAlc " : "Allocate ") + getName() + ": " + getType()->dump();
             helper.add(output);
             return output;
         }
@@ -29,7 +32,7 @@ namespace ir
         {
             is_const_ = is_const;
         }
-        bool getConst() const
+        bool isConst() const
         {
             return is_const_;
         }
@@ -43,9 +46,19 @@ namespace ir
             return staticvalue_;
         }
 
+        void setGlobal(bool is_global)
+        {
+            is_global_ = is_global;
+        }
+        bool isGlobal() const
+        {
+            return is_global_;
+        }
+
     protected:
         std::shared_ptr<Type> type_;
         bool is_const_ = false;
+        bool is_global_ = false;
         std::shared_ptr<StaticValue> staticvalue_;
     };
 

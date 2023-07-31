@@ -13,9 +13,9 @@ namespace ir
   public:
     explicit User(std::shared_ptr<Type> type, std::string name = "") : Value(type, name){};
 
-    bool isConstant() const
+    bool isStaticValue() const
     {
-      return is_constant_;
+      return is_staticvalue_;
     }
     bool isAllocate() const
     {
@@ -28,7 +28,7 @@ namespace ir
   
     
   protected:
-    bool is_constant_;
+    bool is_staticvalue_;
     bool is_allocate_;
     bool is_function_;
 

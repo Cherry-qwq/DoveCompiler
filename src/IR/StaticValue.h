@@ -10,10 +10,10 @@ namespace ir
     class StaticValue : public User
     {
     public:
-        explicit StaticValue(std::shared_ptr<Type> type, std::string name, int32_t val) : User(type, std::move(name)), is_int_(true), int_val_(val) {}
-        explicit StaticValue(std::shared_ptr<Type> type, std::string name, float val) : User(type, std::move(name)), is_float_(true), float_val_(val) {}
-        explicit StaticValue(std::shared_ptr<Type> type, std::string name, bool val) : User(type, std::move(name)), is_bool_(true), bool_val_(val) {}
-        explicit StaticValue(std::shared_ptr<Type> type, std::string name, std::vector<std::shared_ptr<StaticValue>> vals) : User(type, std::move(name)), is_array_(true), array_vals_(vals) {}
+        explicit StaticValue(std::shared_ptr<Type> type, std::string name, int32_t val) : User(type, std::move(name)), is_int_(true), int_val_(val) { is_staticvalue_ = true; }
+        explicit StaticValue(std::shared_ptr<Type> type, std::string name, float val) : User(type, std::move(name)), is_float_(true), float_val_(val) { is_staticvalue_ = true; }
+        explicit StaticValue(std::shared_ptr<Type> type, std::string name, bool val) : User(type, std::move(name)), is_bool_(true), bool_val_(val) { is_staticvalue_ = true; }
+        explicit StaticValue(std::shared_ptr<Type> type, std::string name, std::vector<std::shared_ptr<StaticValue>> vals) : User(type, std::move(name)), is_array_(true), array_vals_(vals) { is_staticvalue_ = true; }
         std::string dump(DumpHelper &helper) const override
         {
             std::string output = "StaticValue ";

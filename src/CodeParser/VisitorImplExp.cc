@@ -24,7 +24,7 @@ namespace front
             throw std::runtime_error("Symbol not found");
         }
         auto symbol = osymbol.value();
-        auto symuser = symbol->getUser();
+        auto symuser = symbol->get();
 
         if (!symuser->getType()->isArray())
         {
@@ -42,13 +42,13 @@ namespace front
             }
             bool isStatic = true;
 
-            if (symuser->isConstant())
+            if (symuser->isStaticValue())
             {
-                auto const_identifier = std::dynamic_pointer_cast<ir::Constant>(symuser);
+                auto const_identifier = std::dynamic_pointer_cast<ir::StaticValue>(symuser);
                 // Check is full const LVal
                 for (auto user : users)
                 {
-                    if (!user->isConstant())
+                    if (!user->isStaticValue())
                     {
                         isStatic = false;
                     }
@@ -59,7 +59,7 @@ namespace front
                     auto subs = std::vector<size_t>();
                     for (auto user : users)
                     {
-                        auto subsconsts = std::dynamic_pointer_cast<ir::Constant>(user);
+                        auto subsconsts = std::dynamic_pointer_cast<ir::StaticValue>(user);
                         if (subsconsts->isInt())
                         {
                             subs.push_back(subsconsts->getIntVal());
@@ -69,8 +69,8 @@ namespace front
                             throw std::runtime_error("Array index must be int");
                         }
                     }
-                    auto constant = const_identifier->arrAt(subs);
-                    return constant;
+                    auto StaticValue = const_identifier->arrAt(subs);
+                    return StaticValue;
                 }
             }
             else
@@ -104,13 +104,13 @@ namespace front
         if (context->IntLiteral())
         {
             auto i = utils::ParseInt32(context->getText());
-            auto p = std::make_shared<ir::Constant>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), "Int", i);
+            auto p = std::make_shared<ir::StaticValue>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), "Int", i);
             return std::dynamic_pointer_cast<ir::User>(p);
         }
         else if (context->FloatLiteral())
         {
             auto i = utils::ParseFloat32(context->getText());
-            auto p = std::make_shared<ir::Constant>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Float32), "Float", i);
+            auto p = std::make_shared<ir::StaticValue>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Float32), "Float", i);
             return std::dynamic_pointer_cast<ir::User>(p);
         }
         throw std::runtime_error("Unknown number type");
@@ -128,7 +128,7 @@ namespace front
     {
         auto unaryOp = std::any_cast<char>(context->unaryOp()->accept(this));
         auto right = std::any_cast<std::shared_ptr<ir::Instruction>>(context->unaryExp()->accept(this));
-        if (right->isConstant())
+        if (right->isStaticValue())
         {
         }
         else
@@ -142,13 +142,13 @@ namespace front
                     auto prim_type = std::dynamic_pointer_cast<ir::PrimitiveDataType>(right->getType());
                     if (prim_type->isInt())
                     {
-                        auto left = std::make_shared<ir::Constant>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), "Int", int32_t(0));
+                        auto left = std::make_shared<ir::StaticValue>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), "Int", int32_t(0));
                         auto add = std::make_shared<ir::Add>(left, right, "add");
                         return add;
                     }
                     else if (prim_type->isFloat())
                     {
-                        auto left = std::make_shared<ir::Constant>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Float32), "Float", float(0));
+                        auto left = std::make_shared<ir::StaticValue>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Float32), "Float", float(0));
                         auto fadd = std::make_shared<ir::FAdd>(left, right, "fadd");
                         return fadd;
                     }
@@ -219,10 +219,10 @@ namespace front
 
         auto left = std::any_cast<std::shared_ptr<ir::User>>(context->mulExp()->accept(this));
         auto right = std::any_cast<std::shared_ptr<ir::User>>(context->unaryExp()->accept(this));
-        if (left->isConstant() && right->isConstant())
+        if (left->isStaticValue() && right->isStaticValue())
         {
-            auto left_const = std::dynamic_pointer_cast<ir::Constant>(left);
-            auto right_const = std::dynamic_pointer_cast<ir::Constant>(right);
+            auto left_const = std::dynamic_pointer_cast<ir::StaticValue>(left);
+            auto right_const = std::dynamic_pointer_cast<ir::StaticValue>(right);
             if (left_const->getType()->isPrimitive() && right_const->getType()->isPrimitive())
             {
                 auto left_prim = std::dynamic_pointer_cast<ir::PrimitiveDataType>(left_const->getType());
@@ -242,7 +242,7 @@ namespace front
                     {
                         value = left_const->getIntVal() % right_const->getIntVal();
                     };
-                    auto result = std::make_shared<ir::Constant>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), "Int", int32_t(value));
+                    auto result = std::make_shared<ir::StaticValue>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), "Int", int32_t(value));
                     return std::dynamic_pointer_cast<ir::User>(result);
                 }
                 else if (left_prim->isFloat() && right_prim->isFloat())
@@ -260,7 +260,7 @@ namespace front
                     {
                         throw std::runtime_error("Float is not support modulo");
                     };
-                    auto result = std::make_shared<ir::Constant>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Float32), "Float", float(value));
+                    auto result = std::make_shared<ir::StaticValue>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Float32), "Float", float(value));
                     return std::dynamic_pointer_cast<ir::User>(result);
                 }
             }
@@ -292,7 +292,7 @@ namespace front
 
         auto left = std::any_cast<std::shared_ptr<ir::User>>(context->addExp()->accept(this));
         auto right = std::any_cast<std::shared_ptr<ir::User>>(context->mulExp()->accept(this));
-        if (left->isConstant() && right->isConstant())
+        if (left->isStaticValue() && right->isStaticValue())
         {
             if (left->getType()->isPrimitive() && right->getType()->isPrimitive())
             {
@@ -302,21 +302,21 @@ namespace front
                 // Int32 add Int32
                 if (left_prim->isInt() && right_prim->isInt())
                 {
-                    auto left_const = std::dynamic_pointer_cast<ir::Constant>(left);
-                    auto right_const = std::dynamic_pointer_cast<ir::Constant>(right);
+                    auto left_const = std::dynamic_pointer_cast<ir::StaticValue>(left);
+                    auto right_const = std::dynamic_pointer_cast<ir::StaticValue>(right);
                     auto left_val = left_const->getIntVal();
                     auto right_val = right_const->getIntVal();
-                    auto add = std::make_shared<ir::Constant>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), "Int", op == '+' ? left_val + right_val : left_val - right_val);
+                    auto add = std::make_shared<ir::StaticValue>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), "Int", op == '+' ? left_val + right_val : left_val - right_val);
                     return std::dynamic_pointer_cast<ir::User>(add);
                     // Float32 add Float32
                 }
                 else if (left_prim->isFloat() && right_prim->isFloat())
                 {
-                    auto left_const = std::dynamic_pointer_cast<ir::Constant>(left);
-                    auto right_const = std::dynamic_pointer_cast<ir::Constant>(right);
+                    auto left_const = std::dynamic_pointer_cast<ir::StaticValue>(left);
+                    auto right_const = std::dynamic_pointer_cast<ir::StaticValue>(right);
                     auto left_val = left_const->getFloatVal();
                     auto right_val = right_const->getFloatVal();
-                    auto add = std::make_shared<ir::Constant>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Float32), "Float", op == '+' ? left_val + right_val : left_val - right_val);
+                    auto add = std::make_shared<ir::StaticValue>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Float32), "Float", op == '+' ? left_val + right_val : left_val - right_val);
                     return std::dynamic_pointer_cast<ir::User>(add);
                 }
                 // pointer add Int ?
@@ -378,14 +378,14 @@ namespace front
     { // TODO
         return 0;
     };
-    //* @return ir::Constant
+    //* @return ir::StaticValue
     std::any VisitorImpl::visitConstExp(SysYParser::ConstExpContext *context)
     {
         auto constExp = std::any_cast<std::shared_ptr<ir::User>>(context->addExp()->accept(this));
-        if (constExp->isConstant())
+        if (constExp->isStaticValue())
         {
-            return std::dynamic_pointer_cast<ir::Constant>(constExp);
+            return std::dynamic_pointer_cast<ir::StaticValue>(constExp);
         }
-        throw std::runtime_error("constExp is not a constant");
+        throw std::runtime_error("constExp is not a StaticValue");
     };
 }
