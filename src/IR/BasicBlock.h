@@ -51,7 +51,7 @@ namespace ir
       helper.indent();
       for (auto &inst : instructions_)
       {
-        helper.add(inst.getValue()->dump(helper));
+        inst.getValue()->dump(helper);
       }
       helper.unindent();
       return s;
@@ -61,8 +61,8 @@ namespace ir
 
     void addInstruction(std::shared_ptr<Instruction> inst)
     {
-      inst->setParent(shared_from_this());
-      instructions_.push_back(std::move(Use(inst, this)));
+    //   inst->setParent(shared_from_this());
+      instructions_.push_back(Use(inst, this));
     };
     std::vector<Use> getInstructions() const
     {

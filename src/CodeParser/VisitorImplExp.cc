@@ -9,7 +9,7 @@ namespace front
 
     std::any VisitorImpl::visitExp(SysYParser::ExpContext *context)
     {
-        return context->addExp()->accept(this);
+        return std::any_cast<std::shared_ptr<ir::User>>(context->addExp()->accept(this));
     };
 
     std::any VisitorImpl::visitCond(SysYParser::CondContext *context)

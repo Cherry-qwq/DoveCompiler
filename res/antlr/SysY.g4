@@ -10,7 +10,7 @@ constDecl : 'const' bType constDef (',' constDef)* ';' ;
 
 bType: 'int' | 'float';
 
-constDef : Identifier ('[' constExp ']')* '=' constInitVal;
+constDef : Identifier ('[' constExp ']')* Assign constInitVal;
 
 constInitVal
     : constExp # scalarConstInitVal
@@ -21,7 +21,7 @@ varDecl : bType varDef (',' varDef)* ';';
 
 varDef
     : Identifier ('[' constExp ']')* # unInitVarDef
-    | Identifier ('[' constExp ']')* '=' initVal # initVarDef
+    | Identifier ('[' constExp ']')* Assign initVal # initVarDef
     ;
 
 initVal
@@ -42,7 +42,7 @@ block : '{' (blockItem)* '}';
 blockItem : decl | stmt;
 
 stmt
-    : lVal '=' exp ';' # assignmentStmt
+    : lVal Assign exp ';' # assignmentStmt
     | (exp)? ';' # expStmt
     | block # blockStmt
     | 'if' '(' cond ')' stmt # ifStmt

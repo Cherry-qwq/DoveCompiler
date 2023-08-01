@@ -15,6 +15,7 @@ Break : 'break';
 Continue : 'continue';
 
 // operator
+
 Lparen : '(' ;
 Rparen : ')' ;
 Lbrkt : '[' ;
@@ -26,6 +27,7 @@ Semicolon : ';';
 Question : '?';
 Colon : ':';
 
+Assign : '=';
 Minus : '-';
 Exclamation : '!';
 Tilde : '~';

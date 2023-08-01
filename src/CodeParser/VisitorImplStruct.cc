@@ -171,6 +171,7 @@ namespace front
 
     return 0;
   };
+
   std::any VisitorImpl::visitBreakStmt(SysYParser::BreakStmtContext *context)
   {
     auto label = std::make_shared<ir::Label>(ctx_.breakBBStack.top()->getLabel());
@@ -178,12 +179,19 @@ namespace front
     ctx_.currentBasicBlock->addInstruction(br);
     return 0;
   };
+
   std::any VisitorImpl::visitContinueStmt(SysYParser::ContinueStmtContext *context)
-  { // TODO Jump to loop entry basic block
+  { auto label = std::make_shared<ir::Label>(ctx_.continueBBStack.top()->getLabel());
+    auto br = std::make_shared<ir::Br>(label, label->getName());
+    ctx_.currentBasicBlock->addInstruction(br);
     return 0;
   };
+
   std::any VisitorImpl::visitReturnStmt(SysYParser::ReturnStmtContext *context)
-  { // TODO Just add this instruction to current basic block
+  { 
+    auto user = std::any_cast<std::shared_ptr<ir::User>>(context->exp()->accept(this));
+    auto ret = std::make_shared<ir::Return>(user, user->getName());
+    ctx_.currentBasicBlock->addInstruction(ret);
     return 0;
   };
 

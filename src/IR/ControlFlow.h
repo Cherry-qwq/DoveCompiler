@@ -63,11 +63,17 @@ namespace ir
   class Return : public Instruction
   {
   public:
-    Return(std::shared_ptr<Value> retVal, std::string name)
-        : Instruction(std::move(retVal->getType()), std::move(name), 1), ret_val_(retVal, this)
+    Return(std::shared_ptr<User> retVal, std::string name)
+        : Instruction(retVal->getType(), name, 1), ret_val_(retVal, this)
     {
       is_terminate_inst_ = true;
     };
+    std::string dump(DumpHelper &helper) const override
+    {
+      std::string output = "Return " + ret_val_.getValue()->dump(helper) + " ";
+      helper.add(output);
+      return output;
+    }
 
   protected:
     Use ret_val_;
