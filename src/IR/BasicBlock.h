@@ -51,20 +51,20 @@ namespace ir
       helper.indent();
       for (auto &inst : instructions_)
       {
-        inst.getValue()->dump(helper);
+        inst->dump(helper);
       }
       helper.unindent();
       return s;
     };
 
-    std::shared_ptr<JPLabel> getLabel();
+    std::shared_ptr<JPLabel> getJPLabel();
 
     void addInstruction(std::shared_ptr<Instruction> inst)
     {
     //   inst->setParent(shared_from_this());
-      instructions_.push_back(Use(inst, this));
+      instructions_.push_back(inst);
     };
-    std::vector<Use> getInstructions() const
+    std::vector<std::shared_ptr<Instruction>> getInstructions() const
     {
       return instructions_;
     }
@@ -79,7 +79,7 @@ namespace ir
       {
         return std::nullopt;
       }
-      auto last = std::dynamic_pointer_cast<Instruction>(instructions_.back().getValue());
+      auto last = instructions_.back();
       if (last->isTerminator())
       {
         return last;
@@ -92,7 +92,8 @@ namespace ir
 
   protected:
     std::shared_ptr<JPLabel> jplabel_;
-    std::vector<Use> instructions_;
+    std::vector<std::shared_ptr<Instruction>> instructions_ = std::vector<std::shared_ptr<Instruction>>();
     BlockType block_type_;
   };
+  typedef BasicBlock::BlockType BlockType;
 }

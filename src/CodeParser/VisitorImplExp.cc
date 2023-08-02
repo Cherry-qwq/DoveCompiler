@@ -12,11 +12,6 @@ namespace front
         return std::any_cast<std::shared_ptr<ir::User>>(context->addExp()->accept(this));
     };
 
-    std::any VisitorImpl::visitCond(SysYParser::CondContext *context)
-    { // TODO
-        return 0;
-    };
-
     std::any VisitorImpl::visitLVal(SysYParser::LValContext *context)
     {
         auto ident = context->Identifier()->getSymbol()->getText();
@@ -89,18 +84,22 @@ namespace front
         // TODO
         return 0;
     };
+
     std::any VisitorImpl::visitPrimParenExp(SysYParser::PrimParenExpContext *context)
     {
         return context->exp()->accept(this);
     };
+
     std::any VisitorImpl::visitPrimRvalExp(SysYParser::PrimRvalExpContext *context)
     {
         return context->rVal()->accept(this);
     };
+
     std::any VisitorImpl::visitPrimConstExp(SysYParser::PrimConstExpContext *context)
     {
         return context->number()->accept(this);
     };
+
     std::any VisitorImpl::visitNumber(SysYParser::NumberContext *context)
     {
         if (context->IntLiteral())
@@ -374,6 +373,8 @@ namespace front
     };
     std::any VisitorImpl::visitLOrToLandExp(SysYParser::LOrToLandExpContext *context)
     { // TODO
+        auto val = std::make_shared<ir::StaticValue>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Boolean), "Bool", true);
+        return std::dynamic_pointer_cast<ir::Value>(val);
         return 0;
     };
     std::any VisitorImpl::visitLOrTwoExp(SysYParser::LOrTwoExpContext *context)

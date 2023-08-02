@@ -18,7 +18,7 @@ namespace ir
   }
   void Function::addBasicBlock(std::shared_ptr<BasicBlock> basic_block)
   {
-    basic_blocks_.push_back(std::move(basic_block));
+    basic_blocks_.push_back(basic_block);
   }
   std::shared_ptr<std::vector<std::shared_ptr<BasicBlock>>> Function::getBasicBlocks()
   {

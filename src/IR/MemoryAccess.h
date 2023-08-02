@@ -20,7 +20,7 @@ namespace ir
         Allocate(std::string name, bool is_const, std::shared_ptr<StaticValue> val) : Allocate(val->getType(), name, is_const, false, val) {}
         Allocate(std::shared_ptr<Type> type, std::string name, bool is_global) : Allocate(type, name, false, is_global, std::make_shared<StaticValue>(StaticValue(type, name, 0))) {}
         Allocate(std::string name, bool is_const, bool is_global, std::shared_ptr<StaticValue> val) : Allocate(val->getType(), name, is_const, is_global, val) {}
-        Allocate(std::shared_ptr<Type> type, std::string name, bool is_const, bool is_global, std::shared_ptr<StaticValue> val) : Instruction(MakePointerType(type->copy()), std::move(name), 1), type_(std::move(type)), is_const_(is_const), is_global_(is_global), staticvalue_(val) { is_allocate_ = true; };
+        Allocate(std::shared_ptr<Type> type, std::string name, bool is_const, bool is_global, std::shared_ptr<StaticValue> val) : Instruction(MakePointerType(type->copy()), std::move(name), 1), type_(std::move(type)), is_const_(is_const), is_global_(is_global), staticvalue_(val) { value_type_ = ValueType::Allocate; }
         std::string dump(DumpHelper &helper) const override
         {
             std::string output = (is_const_ ? "ConstAlc " : "Allocate ") + getName() + ": " + getType()->dump() + " = " + staticvalue_->dump(helper);
