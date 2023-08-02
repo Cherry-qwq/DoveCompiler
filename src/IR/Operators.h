@@ -6,6 +6,14 @@
 #include "Type.h"
 namespace ir
 {
+
+    class BinaryOperator : public Instruction
+    {
+    public:
+        BinaryOperator(std::shared_ptr<Type> type, std::string name)
+            : Instruction(std::move(type), std::move(name), 2){};
+    };
+
     class Add : public Instruction
     {
     public:
