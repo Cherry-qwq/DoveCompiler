@@ -68,7 +68,7 @@ namespace ir
         Load(std::shared_ptr<Value> ptr, std::string name) : Instruction(ptr->getType(), std::move(name), 1), ptr_(ptr, this){};
         std::string dump(DumpHelper &helper) const override
         {
-            std::string output = "Load " + ptr_.getValue()->dump(helper);
+            std::string output = "Load " + ptr_.getValue()->getName();
             helper.add(output);
             return output;
         }

@@ -74,11 +74,15 @@ namespace front
         return 0;
     };
     std::any VisitorImpl::visitAssignmentStmt(SysYParser::AssignmentStmtContext *context)
-    { // TODO Add this instructions to current basic block
-        return 0;
+    {
+        auto left = std::any_cast<std::shared_ptr<ir::User>>(context->lVal()->accept(this));
+        auto right = std::any_cast<std::shared_ptr<ir::User>>(context->exp()->accept(this));
+        auto store = std::make_shared<ir::Store>(right, left);
+        ctx_.currentBasicBlock->addInstruction(store);
+        return std::dynamic_pointer_cast<ir::User>(store);
     };
     std::any VisitorImpl::visitExpStmt(SysYParser::ExpStmtContext *context)
-    { 
+    {
         // context->exp()->accept(this);
         return 0;
     };

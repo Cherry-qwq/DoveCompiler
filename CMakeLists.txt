@@ -10,7 +10,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_BUILD_TYPE Debug)
 
 add_compile_options(
-	-g -Wall -Werror -Wextra -pthread
+	-g -O0 -Wall -Werror -Wextra -pthread
 	-Wno-unused-parameter
 	-Wno-unused-variable
 	-Wno-unknown-pragmas
@@ -43,6 +43,7 @@ add_executable(DoveCompiler
 	${generated}
 	${src}
 )
+
 target_link_libraries(DoveCompiler PUBLIC ${CONAN_LIBS})
 target_include_directories(DoveCompiler PUBLIC
 	includes/deps

@@ -1,1 +1,1 @@
-testFileBase=minimal
+testFileBase=variables

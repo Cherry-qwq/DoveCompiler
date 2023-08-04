@@ -26,7 +26,10 @@ namespace front
         if (!symuser->getType()->isArray())
         {
             // single no subscription lval
-            return symuser;
+            if(symuser->isConst()){
+                throw std::runtime_error("ConstAllocate cannot be a lVal");
+            }
+            return std::dynamic_pointer_cast<ir::User>(symuser);
         }
         else
         {
@@ -90,61 +93,120 @@ namespace front
         auto symbol = osymbol.value();
         auto symuser = symbol->get();
 
-        if (!symuser->getType()->isArray())
+        if (ctx_.symbolTable->getCurrentScope()->isGlobal())
         {
-            // single no subscription lval
-            return symuser;
-        }
-        else
-        {
-            // array ele with subscription lval
-            auto users = std::vector<std::shared_ptr<ir::User>>();
-            for (auto exp : context->exp())
+            if (!symuser->getType()->isArray())
             {
-                auto user = std::any_cast<std::shared_ptr<ir::User>>(exp->accept(this));
-                users.push_back(user);
-            }
-            bool isStatic = true;
-
-            if (symuser->isStaticValue())
-            {
-                auto const_identifier = std::dynamic_pointer_cast<ir::StaticValue>(symuser);
-                // Check is full const LVal
-                for (auto user : users)
-                {
-                    if (!user->isStaticValue())
-                    {
-                        isStatic = false;
-                    }
-                }
-
-                if (isStatic)
-                {
-                    auto subs = std::vector<size_t>();
-                    for (auto user : users)
-                    {
-                        auto subsconsts = std::dynamic_pointer_cast<ir::StaticValue>(user);
-                        if (subsconsts->isInt())
-                        {
-                            subs.push_back(subsconsts->getInt());
-                        }
-                        else
-                        {
-                            throw std::runtime_error("Array index must be int");
-                        }
-                    }
-                    auto static_value = const_identifier->at(subs);
-                    return std::dynamic_pointer_cast<ir::User>(static_value);
-                }
+                // single no subscription lval
+                return std::dynamic_pointer_cast<ir::User>(symuser);
             }
             else
             {
-                // TODO add getelemntptr and Stores
+                // array ele with subscription lval
+                auto users = std::vector<std::shared_ptr<ir::User>>();
+                for (auto exp : context->exp())
+                {
+                    auto user = std::any_cast<std::shared_ptr<ir::User>>(exp->accept(this));
+                    users.push_back(user);
+                }
+                bool isStatic = true;
+
+                if (symuser->isStaticValue())
+                {
+                    auto const_identifier = std::dynamic_pointer_cast<ir::StaticValue>(symuser);
+                    // Check is full const LVal
+                    for (auto user : users)
+                    {
+                        if (!user->isStaticValue())
+                        {
+                            isStatic = false;
+                        }
+                    }
+
+                    if (isStatic)
+                    {
+                        auto subs = std::vector<size_t>();
+                        for (auto user : users)
+                        {
+                            auto subsconsts = std::dynamic_pointer_cast<ir::StaticValue>(user);
+                            if (subsconsts->isInt())
+                            {
+                                subs.push_back(subsconsts->getInt());
+                            }
+                            else
+                            {
+                                throw std::runtime_error("Array index must be int");
+                            }
+                        }
+                        auto static_value = const_identifier->at(subs);
+                        return std::dynamic_pointer_cast<ir::User>(static_value);
+                    }
+                }
+                else
+                {
+                    throw std::runtime_error("Global RVal must be a const.");
+                }
+            }
+        }
+        else
+        {
+            if (!symuser->getType()->isArray())
+            {
+                // single no subscription lval
+                auto load = std::make_shared<ir::Load>(symuser, "->load:"+symuser->getName());
+                ctx_.currentBasicBlock->addInstruction(load);
+                return std::dynamic_pointer_cast<ir::User>(load);
+            }
+            else
+            {
+                // array ele with subscription lval
+                auto users = std::vector<std::shared_ptr<ir::User>>();
+                for (auto exp : context->exp())
+                {
+                    auto user = std::any_cast<std::shared_ptr<ir::User>>(exp->accept(this));
+                    users.push_back(user);
+                }
+                bool isStatic = true;
+
+                if (symuser->isStaticValue())
+                {
+                    auto const_identifier = std::dynamic_pointer_cast<ir::StaticValue>(symuser);
+                    // Check is full const LVal
+                    for (auto user : users)
+                    {
+                        if (!user->isStaticValue())
+                        {
+                            isStatic = false;
+                        }
+                    }
+
+                    if (isStatic)
+                    {
+                        auto subs = std::vector<size_t>();
+                        for (auto user : users)
+                        {
+                            auto subsconsts = std::dynamic_pointer_cast<ir::StaticValue>(user);
+                            if (subsconsts->isInt())
+                            {
+                                subs.push_back(subsconsts->getInt());
+                            }
+                            else
+                            {
+                                throw std::runtime_error("Array index must be int");
+                            }
+                        }
+                        auto static_value = const_identifier->at(subs);
+                        return std::dynamic_pointer_cast<ir::User>(static_value);
+                    }
+                }
+                else
+                {
+                    // TODO add getelemntptr and Stores
+                }
             }
         }
 
         throw std::runtime_error("Unknown symbol type");
-        return 0;
     };
 
     std::any VisitorImpl::visitPrimParenExp(SysYParser::PrimParenExpContext *context)
@@ -521,15 +583,43 @@ namespace front
                 auto right_prim = std::dynamic_pointer_cast<ir::PrimitiveDataType>(right->getType());
                 if (left_prim->isInt() && right_prim->isInt())
                 {
-                    auto add = std::make_shared<ir::Add>(left, right, "add");
-                    ctx_.currentBasicBlock->addInstruction(add);
-                    return std::dynamic_pointer_cast<ir::User>(add);
+                    switch (op)
+                    {
+                    case '+':
+                    {
+                        auto add = std::make_shared<ir::Add>(left, right, "add");
+                        ctx_.currentBasicBlock->addInstruction(add);
+                        return std::dynamic_pointer_cast<ir::User>(add);
+                    }
+                    case '-':
+                    {
+                        auto sub = std::make_shared<ir::Sub>(left, right, "sub");
+                        ctx_.currentBasicBlock->addInstruction(sub);
+                        return std::dynamic_pointer_cast<ir::User>(sub);
+                    }
+                    default:
+                        break;
+                    }
                 }
                 else if (left_prim->isFloat() && right_prim->isFloat())
                 {
-                    auto fadd = std::make_shared<ir::FAdd>(left, right, "fadd");
-                    ctx_.currentBasicBlock->addInstruction(fadd);
-                    return std::dynamic_pointer_cast<ir::User>(fadd);
+                    switch (op)
+                    {
+                    case '+':
+                    {
+                        auto fadd = std::make_shared<ir::FAdd>(left, right, "fadd");
+                        ctx_.currentBasicBlock->addInstruction(fadd);
+                        return std::dynamic_pointer_cast<ir::User>(fadd);
+                    }
+                    case '-':
+                    {
+                        auto fsub = std::make_shared<ir::FSub>(left, right, "fsub");
+                        ctx_.currentBasicBlock->addInstruction(fsub);
+                        return std::dynamic_pointer_cast<ir::User>(fsub);
+                    }
+                    default:
+                        break;
+                    }
                 }
                 else
                 {

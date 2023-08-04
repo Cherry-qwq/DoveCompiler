@@ -155,21 +155,29 @@ namespace front
                 {
                     m_target->setStaticValue(static_value->getBool());
                 }
+                return 0;
             }
-            else
-            {
-                throw std::runtime_error("ConstDef for Scalar cannot be init.");
-            }
-            return 0;
+            throw std::runtime_error("ConstDef for Scalar cannot be init.");
         }
         else
         {
-            auto getElementPtr = std::make_shared<ir::GetElementPtr>(ctx_.currentAllocate, ctx_.currentAllocate->getType(), ctx_.currentElementIdx, ctx_.currentAllocate->getName());
-            auto val = std::any_cast<std::shared_ptr<ir::User>>(context->exp()->accept(this));
-            auto store = std::make_shared<ir::Store>(val, getElementPtr);
-            ctx_.currentBasicBlock->addInstruction(getElementPtr);
-            ctx_.currentBasicBlock->addInstruction(store);
-            return 0;
+            // no subs var
+            if (!ctx_.isElement)
+            {
+                auto val = std::any_cast<std::shared_ptr<ir::User>>(context->exp()->accept(this));
+                auto store = std::make_shared<ir::Store>(val, ctx_.currentAllocate);
+                ctx_.currentBasicBlock->addInstruction(store);
+                return std::dynamic_pointer_cast<ir::User>(store);
+            }
+            else //sub var
+            {
+                auto val = std::any_cast<std::shared_ptr<ir::User>>(context->exp()->accept(this));
+                auto store = std::make_shared<ir::Store>(val, ctx_.currentElementPtr);
+                ctx_.isElement = false;
+                ctx_.currentBasicBlock->addInstruction(store);
+                return std::dynamic_pointer_cast<ir::User>(store);
+            }
+            throw std::runtime_error("Init var has wrong format.");
         }
     };
 
@@ -183,6 +191,7 @@ namespace front
                 int i = 0;
                 for (auto initVal : context->initVal())
                 {
+                    ctx_.isElement = true;
                     ctx_.currentInitValue.push(init_target->at(i));
                     initVal->accept(this);
                     ctx_.currentInitValue.pop();
