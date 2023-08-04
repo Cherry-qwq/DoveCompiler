@@ -1,0 +1,27 @@
+int b = 1, a[2+1+5], c[3*3+1][4];
+float w = 1.0;
+int h[2] = {1,2};
+const float d = 2.0;
+const int r = 5;
+const int c[2] = {1,2};
+int g(){
+  int k = 0;
+  float f;
+  2+2;
+  if(true){
+    if(true){
+        while(true){
+        
+        }
+    }else{
+      
+    }
+  }else{
+    
+  };
+  return -1;
+}
+
+int j(){
+
+}

@@ -66,7 +66,6 @@ namespace front
         if (context->decl())
         {
             context->decl()->accept(this);
-            // TODO Add decl allocates to current basic block
         }
         else if (context->stmt())
         {
@@ -79,7 +78,8 @@ namespace front
         return 0;
     };
     std::any VisitorImpl::visitExpStmt(SysYParser::ExpStmtContext *context)
-    { // TODO Add this instruction to current basic block
+    { 
+        // context->exp()->accept(this);
         return 0;
     };
     std::any VisitorImpl::visitBlockStmt(SysYParser::BlockStmtContext *context)
@@ -169,7 +169,7 @@ namespace front
         std::shared_ptr<ir::Br> entry_br;
         if (cond->getValueType() == ir::ValueType::StaticValue && false) //! for debug
         {
-            if (cond->getType()->isPrimitive() && std::dynamic_pointer_cast<ir::PrimitiveDataType>(cond->getType())->isBool() && std::dynamic_pointer_cast<ir::StaticValue>(cond)->getBoolVal())
+            if (cond->getType()->isPrimitive() && std::dynamic_pointer_cast<ir::PrimitiveDataType>(cond->getType())->isBool() && std::dynamic_pointer_cast<ir::StaticValue>(cond)->getBool())
             {
                 entry_br = std::make_shared<ir::Br>(body_label, body_label->getName());
             }
@@ -206,7 +206,7 @@ namespace front
         auto label = std::make_shared<ir::Label>(ctx_.breakBBStack.top()->getJPLabel());
         auto br = std::make_shared<ir::Br>(label, label->getName());
         ctx_.currentBasicBlock->addInstruction(br);
-        return 0;
+        return std::dynamic_pointer_cast<ir::User>(br);
     };
 
     std::any VisitorImpl::visitContinueStmt(SysYParser::ContinueStmtContext *context)
@@ -214,7 +214,7 @@ namespace front
         auto label = std::make_shared<ir::Label>(ctx_.continueBBStack.top()->getJPLabel());
         auto br = std::make_shared<ir::Br>(label, label->getName());
         ctx_.currentBasicBlock->addInstruction(br);
-        return 0;
+        return std::dynamic_pointer_cast<ir::User>(br);
     };
 
     std::any VisitorImpl::visitReturnStmt(SysYParser::ReturnStmtContext *context)
@@ -222,7 +222,7 @@ namespace front
         auto user = std::any_cast<std::shared_ptr<ir::User>>(context->exp()->accept(this));
         auto ret = std::make_shared<ir::Return>(user, user->getName());
         ctx_.currentBasicBlock->addInstruction(ret);
-        return 0;
+        return std::dynamic_pointer_cast<ir::User>(ret);
     };
 
 }

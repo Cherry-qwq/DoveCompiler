@@ -6,6 +6,8 @@
 #include "Utils/Configure.h"
 #include "CodeParser/VisitorImpl.h"
 #include "Assemble/AsmGen.h"
+
+
 int main(int argc, char *argv[])
 {
 	config::init(argc, argv);
@@ -17,7 +19,7 @@ int main(int argc, char *argv[])
 	front::SysYLexer m_lexer(&input);
 	antlr4::CommonTokenStream tokens(&m_lexer);
 	front::SysYParser m_parser(&tokens);
-	m_parser.setErrorHandler(std::make_shared<antlr4::BailErrorStrategy>());
+	// m_parser.setErrorHandler(std::make_shared<antlr4::BailErrorStrategy>());
 	front::SysYParser::CompUnitContext *root = m_parser.compUnit();
 
 	//	front : ast => ir

@@ -18,8 +18,6 @@ namespace front
                 if (user->isAllocate())
                 {
                     auto allocate = std::dynamic_pointer_cast<ir::Allocate>(user);
-                    sym = std::make_shared<Symbol>(user->getName(), std::dynamic_pointer_cast<ir::Allocate>(user));
-                    ctx_.symbolTable->addSymbolToGlobalScope(user->getName(), sym);
                     ctx_.compUnit->addGlobalObject(user);
                 }
                 else
@@ -54,18 +52,6 @@ namespace front
         return users;
     };
 
-    std::any VisitorImpl::visitConstDecl(SysYParser::ConstDeclContext *context)
-    {
-        auto typeID = std::any_cast<ir::PrimitiveDataType::TypeID>(context->bType()->accept(this));
-        auto allocates = std::vector<std::shared_ptr<ir::Allocate>>();
-        for (auto constDef : context->constDef())
-        {
-            auto a = std::any_cast<std::shared_ptr<ir::Allocate>>(constDef->accept(this));
-            allocates.push_back(a);
-        }
-        return allocates;
-    };
-
     std::any VisitorImpl::visitBType(SysYParser::BTypeContext *context)
     {
         auto typeID = ir::PrimitiveDataType::TypeID::Int32;
@@ -77,136 +63,8 @@ namespace front
         {
             typeID = ir::PrimitiveDataType::TypeID::Float32;
         }
+        ctx_.currentDeclTypeId = typeID;
         return typeID;
-    };
-
-    std::any VisitorImpl::visitConstDef(SysYParser::ConstDefContext *context)
-    {
-        std::shared_ptr<ir::Allocate> allocate;
-        std::string name = context->Identifier()->getSymbol()->getText();
-        std::shared_ptr<ir::Type> a_type = ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32);
-        if (context->constExp().size() > 0)
-        {
-            for (auto constExp : context->constExp())
-            {
-                auto size_sv = std::any_cast<ir::StaticValue>(constExp->accept(this));
-                int32_t size_val = size_sv.getIntVal();
-                a_type = MakeArrayType(a_type, size_val);
-            }
-        }
-        allocate = std::make_shared<ir::Allocate>(a_type, name);
-
-        if (context->constInitVal())
-        {
-            auto initVal = std::any_cast<std::shared_ptr<ir::User>>(context->constInitVal()->accept(this));
-            if (initVal->isStaticValue())
-            {
-                allocate->setInitValue(std::dynamic_pointer_cast<ir::StaticValue>(initVal));
-            }
-        }
-        else
-        {
-            throw std::runtime_error("constDef must have initVal");
-        }
-
-        return allocate;
-    };
-
-    std::any VisitorImpl::visitScalarConstInitVal(SysYParser::ScalarConstInitValContext *context)
-    {
-        // constExp requires a StaticValue
-        return context->constExp()->accept(this);
-    };
-
-    std::any VisitorImpl::visitListConstInitVal(SysYParser::ListConstInitValContext *context)
-    { // TODO
-        return 0;
-    };
-
-    std::any VisitorImpl::visitVarDecl(SysYParser::VarDeclContext *context)
-    {
-        auto typeID = std::any_cast<ir::PrimitiveDataType::TypeID>(context->bType()->accept(this));
-        auto allocates = std::vector<std::shared_ptr<ir::Allocate>>();
-        for (auto varDef : context->varDef())
-        {
-            auto allocate = std::any_cast<std::shared_ptr<ir::Allocate>>(varDef->accept(this));
-            if (allocate->getType()->isArray())
-            {
-                std::dynamic_pointer_cast<ir::ArrayType>(allocate->getType())->setInternalType(ir::MakePrimitiveDataType(typeID));
-            }
-            else
-            {
-                allocate->setType(ir::MakePrimitiveDataType(typeID));
-            }
-            allocates.push_back(allocate);
-        }
-        return allocates;
-    };
-
-    std::any VisitorImpl::visitUnInitVarDef(SysYParser::UnInitVarDefContext *context)
-    {
-        std::shared_ptr<ir::Allocate> allocate;
-        auto varName = context->Identifier()->getSymbol()->getText();
-        std::shared_ptr<ir::Type> arr_type = MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32);
-
-        if (context->constExp().size() > 0)
-        {
-            // std::reverse(context->constExp().begin(), context->constExp().end());
-            for (auto constExp : context->constExp())
-            {
-                // idx requests a StaticValue
-                auto size_sv = std::any_cast<std::shared_ptr<ir::StaticValue>>(constExp->accept(this));
-                assert(size_sv->isInt());
-                int32_t size_val = size_sv->getIntVal();
-                arr_type = MakeArrayType(arr_type, size_val);
-            }
-        }
-        allocate = std::make_shared<ir::Allocate>(arr_type, varName);
-        return allocate;
-    };
-
-    std::any VisitorImpl::visitInitVarDef(SysYParser::InitVarDefContext *context)
-    {
-        std::shared_ptr<ir::Allocate> allocate;
-        auto varName = context->Identifier()->getSymbol()->getText();
-        std::shared_ptr<ir::Type> a_type = MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32);
-
-        if (context->constExp().size() > 0)
-        {
-            for (auto constExp : context->constExp())
-            {
-                // idx requests a StaticValue
-                auto size_sv = std::any_cast<std::shared_ptr<ir::StaticValue>>(constExp->accept(this));
-                assert(size_sv->isInt());
-                int32_t size_val = size_sv->getIntVal();
-                a_type = MakeArrayType(a_type, size_val);
-            }
-        }
-
-        allocate = std::make_shared<ir::Allocate>(a_type, varName);
-
-        auto init_val = std::any_cast<std::shared_ptr<ir::User>>(context->initVal()->accept(this));
-        if (init_val->isStaticValue())
-        {
-            // static init
-            allocate->setInitValue(std::dynamic_pointer_cast<ir::StaticValue>(init_val));
-        }
-        else
-        {
-            // TODO add ir stmts for dynamic init
-        }
-
-        return allocate;
-    };
-
-    std::any VisitorImpl::visitScalarInitVal(SysYParser::ScalarInitValContext *context)
-    {
-        return context->exp()->accept(this);
-    };
-
-    std::any VisitorImpl::visitListInitVal(SysYParser::ListInitValContext *context)
-    { // TODO
-        return 0;
     };
 
     std::any VisitorImpl::visitTerminal(antlr4::tree::TerminalNode *node)

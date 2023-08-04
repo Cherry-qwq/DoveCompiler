@@ -1,19 +1,4 @@
-int b = 1, a[2+1+5], c[3*3+1][4];
-int g(){
-  if(true){
-    if(true){
-        while(true){
-        
-        }
-    }else{
-      
-    }
-  }else{
-    
-  };
-  return 0;
-}
-
-int j(){
-
+int main() {
+    int a = 123 - 122;
+    return a;
 }

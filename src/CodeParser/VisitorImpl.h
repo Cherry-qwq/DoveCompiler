@@ -4,6 +4,7 @@
 #include <variant>
 #include <memory>
 #include <stack>
+#include <vector>
 
 #include <antlr4-runtime.h>
 #include <SysYParser.h>
@@ -28,6 +29,10 @@ namespace front
     std::shared_ptr<ir::Function> currentFunction;
 
     std::vector<std::shared_ptr<ir::Allocate>> currentAllocates;
+    std::shared_ptr<ir::Allocate> currentAllocate;
+    std::stack<std::shared_ptr<ir::StaticValue>> currentInitValue;
+    std::vector<std::shared_ptr<ir::Value>> currentElementIdx;
+    ir::PrimitiveDataType::TypeID currentDeclTypeId;
 
     std::shared_ptr<ir::BasicBlock> entryBasicBlock;
     std::shared_ptr<ir::BasicBlock> currentBasicBlock;

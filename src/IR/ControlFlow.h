@@ -167,7 +167,7 @@ namespace ir
         };
         std::string dump(DumpHelper &helper) const override
         {
-            std::string output = "Return " + ret_val_.getValue()->dump(helper) + " ";
+            std::string output = "Return " + ret_val_.getValue()->getName() + " ";
             helper.add(output);
             return output;
         }

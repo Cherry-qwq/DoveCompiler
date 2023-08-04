@@ -16,14 +16,14 @@ namespace ir
     class Allocate : public Instruction
     {
     public:
-        Allocate(std::shared_ptr<Type> type, std::string name) : Allocate(type, name, false, false, std::make_shared<StaticValue>(StaticValue(type, name, 0))) {}
+        Allocate(std::shared_ptr<Type> type, std::string name) : Allocate(type, name, false, false, std::make_shared<StaticValue>(name, 0)) {}
         Allocate(std::string name, bool is_const, std::shared_ptr<StaticValue> val) : Allocate(val->getType(), name, is_const, false, val) {}
-        Allocate(std::shared_ptr<Type> type, std::string name, bool is_global) : Allocate(type, name, false, is_global, std::make_shared<StaticValue>(StaticValue(type, name, 0))) {}
+        Allocate(std::shared_ptr<Type> type, std::string name, bool is_global) : Allocate(type, name, false, is_global, std::make_shared<StaticValue>(name, 0)) {}
         Allocate(std::string name, bool is_const, bool is_global, std::shared_ptr<StaticValue> val) : Allocate(val->getType(), name, is_const, is_global, val) {}
         Allocate(std::shared_ptr<Type> type, std::string name, bool is_const, bool is_global, std::shared_ptr<StaticValue> val) : Instruction(MakePointerType(type->copy()), std::move(name), 1), type_(std::move(type)), is_const_(is_const), is_global_(is_global), staticvalue_(val) { value_type_ = ValueType::Allocate; }
         std::string dump(DumpHelper &helper) const override
         {
-            std::string output = (is_const_ ? "ConstAlc " : "Allocate ") + getName() + ": " + getType()->dump() + " = " + staticvalue_->dump(helper);
+            std::string output = (is_const_ ? "ConstAlc " : "Allocate ") + getName() + ": " + getType()->dump() + " -> " + staticvalue_->dump(helper);
             helper.add(output);
             return output;
         }
@@ -84,7 +84,7 @@ namespace ir
 
         std::string dump(DumpHelper &helper) const override
         {
-            std::string output = "Store " + val_.getValue()->dump(helper) + " " + ptr_.getValue()->dump(helper);
+            std::string output = "Store " + val_.getValue()->getName() + " " + ptr_.getValue()->getName();
             helper.add(output);
             return output;
         }
@@ -97,14 +97,22 @@ namespace ir
     class GetElementPtr : public Instruction
     {
     public:
-        explicit GetElementPtr(std::shared_ptr<User> ptr, std::shared_ptr<Type> type, std::vector<std::shared_ptr<User>> idx, const std::string &name) : Instruction(MakePointerType(ptr->getType()->copy()), std::move(name), 2), ptr_(ptr, this)
+        explicit GetElementPtr(std::shared_ptr<User> ptr, std::shared_ptr<Type> type, std::vector<std::shared_ptr<Value>> idx, const std::string &name) : Instruction(MakePointerType(ptr->getType()->copy()), std::move(name), 2), ptr_(ptr, this)
         {
             for (auto &i : idx)
             {
                 idx_.push_back(Use(i, this));
             }
         };
-
+        std::string dump(DumpHelper& helper) const {
+            std::string output = "GetElementPtr ";
+            output += ptr_.getValue()->getName() + ", ";
+            for(Use use : idx_){
+                output += use.getValue()->getName() + ", ";
+            }
+            helper.add(output);
+            return output;
+        }
     protected:
         Use ptr_;
         std::vector<Use> idx_;
