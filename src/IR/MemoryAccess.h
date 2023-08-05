@@ -65,7 +65,7 @@ namespace ir
     class Load : public Instruction
     {
     public:
-        Load(std::shared_ptr<Value> ptr, std::string name) : Instruction(ptr->getType(), std::move(name), 1), ptr_(ptr, this){};
+        Load(std::shared_ptr<Value> ptr, std::string name) : Instruction(std::dynamic_pointer_cast<PointerType>(ptr->getType())->getReferenceType(), std::move(name), 1), ptr_(ptr, this){};
         std::string dump(DumpHelper &helper) const override
         {
             std::string output = "Load " + ptr_.getValue()->getName();
@@ -84,7 +84,7 @@ namespace ir
 
         std::string dump(DumpHelper &helper) const override
         {
-            std::string output = "Store " + val_.getValue()->getName() + " " + ptr_.getValue()->getName();
+            std::string output = "Store " + val_.getValue()->getName() + ", " + ptr_.getValue()->getName();
             helper.add(output);
             return output;
         }
@@ -104,15 +104,18 @@ namespace ir
                 idx_.push_back(Use(i, this));
             }
         };
-        std::string dump(DumpHelper& helper) const {
+        std::string dump(DumpHelper &helper) const
+        {
             std::string output = "GetElementPtr ";
             output += ptr_.getValue()->getName() + ", ";
-            for(Use use : idx_){
+            for (Use use : idx_)
+            {
                 output += use.getValue()->getName() + ", ";
             }
             helper.add(output);
             return output;
         }
+
     protected:
         Use ptr_;
         std::vector<Use> idx_;

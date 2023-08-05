@@ -2,5 +2,5 @@
 class Options
 {
 public:
-    const static bool kStaticOptimi = false;
+    const static bool kStaticOptimi = true;
 };

@@ -6,15 +6,62 @@
 #include <map>
 
 #include "Instruction.h"
+#include "MemoryAccess.h"
+
 namespace ir
 {
 
     class BasicBlock;
+    class Function : public User
+    {
+    public:
+        Function(std::shared_ptr<Type> type, std::string name)
+            : User(std::move(type), std::move(name))
+        {
+            is_function_ = true;
+            value_type_ = ValueType::Function;
+        };
+        std::string dump(DumpHelper &helper) const override;
+        void addBasicBlock(std::shared_ptr<BasicBlock> basic_block);
+        std::shared_ptr<std::vector<std::shared_ptr<BasicBlock>>> getBasicBlocks();
+
+        void setExtern(bool is_extern)
+        {
+            if(is_extern){
+                basic_blocks_.clear();
+            }
+            is_extern_ = is_extern;
+        };
+
+        bool isExtern() const
+        {
+            return is_extern_;
+        };
+
+        void addArgument(std::shared_ptr<Allocate> argument)
+        {
+            arguments_.push_back(argument);
+        }
+
+        std::vector<std::shared_ptr<Allocate>> getArguments()
+        {
+            return arguments_;
+        }
+
+    protected:
+        bool is_extern_ = false;
+        std::vector<std::shared_ptr<BasicBlock>> basic_blocks_;
+        std::vector<std::shared_ptr<Allocate>> arguments_;
+    };
+
     class CompUnit : public User
     {
     public:
         CompUnit(std::shared_ptr<Type> type, std::string name)
-            : User(std::move(type), name){};
+            : User(std::move(type), name)
+        {
+            value_type_ = ValueType::CompUnit;
+        };
         std::string dump(DumpHelper &helper) const override
         {
             std::string output = "CompUnit " + getName() + " ";
@@ -38,27 +85,16 @@ namespace ir
             return std::make_shared<std::vector<Use>>(global_objects_);
         }
 
+        std::shared_ptr<Function> getFunction(std::string name);
+
     protected:
         std::vector<Use> global_objects_;
-    };
-
-    class Function : public User
-    {
-    public:
-        Function(std::shared_ptr<Type> type, std::string name)
-            : User(std::move(type), std::move(name)) { is_function_ = true; };
-        std::string dump(DumpHelper &helper) const override;
-        void addBasicBlock(std::shared_ptr<BasicBlock> basic_block);
-        std::shared_ptr<std::vector<std::shared_ptr<BasicBlock>>> getBasicBlocks();
-
-    protected:
-        std::vector<std::shared_ptr<BasicBlock>> basic_blocks_;
     };
 
     class Icmp : public Instruction
     {
     public:
-        enum class ICompId
+        enum class IcmpId
         {
             EQ,
             NE,
@@ -69,27 +105,30 @@ namespace ir
             Default,
         };
 
-        explicit Icmp(ICompId cid, std::shared_ptr<Value> lhs, std::shared_ptr<Value> rhs, std::string name)
-            : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name), 2), lhs_(lhs, this), rhs_(rhs, this), comp_id_(cid){};
+        explicit Icmp(IcmpId cid, std::shared_ptr<Value> lhs, std::shared_ptr<Value> rhs, std::string name)
+            : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name), 2), lhs_(lhs, this), rhs_(rhs, this), comp_id_(cid)
+        {
+            value_type_ = ValueType::Icmp;
+        };
 
-        std::string getOperatorLiterial(ICompId id) const
+        std::string getOperatorLiterial(IcmpId id) const
         {
             switch (id)
             {
-            case ICompId::EQ:
+            case IcmpId::EQ:
                 return "==";
-            case ICompId::NE:
+            case IcmpId::NE:
                 return "!=";
-            case ICompId::GT:
+            case IcmpId::GT:
                 return ">";
-            case ICompId::GE:
+            case IcmpId::GE:
                 return ">=";
-            case ICompId::LT:
+            case IcmpId::LT:
                 return "<";
-            case ICompId::LE:
+            case IcmpId::LE:
                 return "<=";
             default:
-                throw std::runtime_error("Unknown ICompId");
+                throw std::runtime_error("Unknown IcmpId");
             }
         }
 
@@ -103,13 +142,13 @@ namespace ir
     protected:
         Use lhs_;
         Use rhs_;
-        ICompId comp_id_ = ICompId::EQ;
+        IcmpId comp_id_ = IcmpId::EQ;
     };
 
     class Fcmp : public Instruction
     {
     public:
-        enum class FCompId
+        enum class FcmpId
         {
             EQ,
             NE,
@@ -120,27 +159,30 @@ namespace ir
             Default,
         };
 
-        explicit Fcmp(FCompId cid, std::shared_ptr<Value> lhs, std::shared_ptr<Value> rhs, std::string name)
-            : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name), 2), lhs_(lhs, this), rhs_(rhs, this), comp_id_(cid){};
+        explicit Fcmp(FcmpId cid, std::shared_ptr<Value> lhs, std::shared_ptr<Value> rhs, std::string name)
+            : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name), 2), lhs_(lhs, this), rhs_(rhs, this), comp_id_(cid)
+        {
+            value_type_ = ValueType::Fcmp;
+        };
 
-        std::string getOperatorLiterial(FCompId id) const
+        std::string getOperatorLiterial(FcmpId id) const
         {
             switch (id)
             {
-            case FCompId::EQ:
+            case FcmpId::EQ:
                 return "==";
-            case FCompId::NE:
+            case FcmpId::NE:
                 return "!=";
-            case FCompId::GT:
+            case FcmpId::GT:
                 return ">";
-            case FCompId::GE:
+            case FcmpId::GE:
                 return ">=";
-            case FCompId::LT:
+            case FcmpId::LT:
                 return "<";
-            case FCompId::LE:
+            case FcmpId::LE:
                 return "<=";
             default:
-                throw std::runtime_error("Unknown FCompId");
+                throw std::runtime_error("Unknown FcmpId");
             }
         }
 
@@ -154,7 +196,7 @@ namespace ir
     protected:
         Use lhs_;
         Use rhs_;
-        FCompId comp_id_ = FCompId::EQ;
+        FcmpId comp_id_ = FcmpId::EQ;
     };
 
     class Return : public Instruction
@@ -164,6 +206,7 @@ namespace ir
             : Instruction(retVal->getType(), name, 1), ret_val_(retVal, this)
         {
             is_terminate_inst_ = true;
+            value_type_ = ValueType::Return;
         };
         std::string dump(DumpHelper &helper) const override
         {
@@ -179,7 +222,10 @@ namespace ir
     class JPLabel : public Instruction
     {
     public:
-        explicit JPLabel(std::string label_name) : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), label_name, 0), label_name_(label_name){};
+        explicit JPLabel(std::string label_name) : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), label_name, 0), label_name_(label_name)
+        {
+            value_type_ = ValueType::JPLabel;
+        };
         std::string dump(DumpHelper &helper) const override
         {
             std::string output = "JPLabel " + getName() + ": ";
@@ -194,7 +240,10 @@ namespace ir
     class Label : public Instruction
     {
     public:
-        explicit Label(std::shared_ptr<JPLabel> jplabel) : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), jplabel->getName(), 0), jplabel_(jplabel){};
+        explicit Label(std::shared_ptr<JPLabel> jplabel) : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), jplabel->getName(), 0), jplabel_(jplabel)
+        {
+            value_type_ = ValueType::Label;
+        };
         std::string dump(DumpHelper &helper) const override
         {
             std::string output = "Label " + getName() + "";
@@ -221,14 +270,24 @@ namespace ir
     class Call : public Instruction
     {
     public:
-        explicit Call(std::shared_ptr<Function> callee, std::string name) : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name), 2), callee_(callee){};
-        explicit Call(std::shared_ptr<Function> callee, std::vector<std::shared_ptr<Value>> args, std::string name) : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name), 2), callee_(callee)
+        explicit Call(std::shared_ptr<Function> callee, std::vector<std::shared_ptr<User>> args, std::string name) : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name), 2), callee_(callee)
         {
             for (auto &arg : args)
             {
                 args_.push_back(Use(arg, this));
             }
+            value_type_ = ValueType::Call;
         };
+        std::string dump(DumpHelper &helper) const override
+        {
+            std::string output = "Call " + callee_->getName() + ", ";
+            for (auto &arg : args_)
+            {
+                output += arg.getValue()->getName() + ", ";
+            }
+            helper.add(output);
+            return output;
+        }
 
     protected:
         std::shared_ptr<Function> callee_;
@@ -241,10 +300,12 @@ namespace ir
         Br(std::shared_ptr<Value> condition, std::shared_ptr<Label> t_label, std::shared_ptr<Label> f_label, std::string name) : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name), 1), has_condition_(true), condition_(condition, this), t_label_(t_label, this), f_label_(f_label, this)
         {
             is_terminate_inst_ = true;
+            value_type_ = ValueType::Br;
         };
         Br(std::shared_ptr<Label> t_label, std::string name) : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), name, 0), t_label_(t_label, this)
         {
             is_terminate_inst_ = true;
+            value_type_ = ValueType::Br;
         };
         std::string dump(DumpHelper &helper) const
         {

@@ -4,52 +4,6 @@
 
 namespace front
 {
-    std::any VisitorImpl::visitFuncDef(SysYParser::FuncDefContext *context)
-    {
-        auto typeID = std::any_cast<ir::PrimitiveDataType::TypeID>(context->funcType()->accept(this));
-        std::string funcName = context->Identifier()->getSymbol()->getText();
-        ctx_.currentFunction = std::make_shared<ir::Function>(ir::MakePrimitiveDataType(typeID), funcName);
-        ctx_.symbolTable->pushScope("function");
-
-        if (context->block())
-        {
-            // Add entry basic block to function
-            auto entry_bb_name = "_" + funcName + "_entry";
-            auto bb = std::make_shared<ir::BasicBlock>(entry_bb_name, ir::BasicBlock::BlockType::FunctionEntry);
-            ctx_.currentBasicBlock = bb;
-            ctx_.currentFunction->addBasicBlock(bb);
-
-            context->block()->accept(this);
-        }
-
-        ctx_.symbolTable->popScope();
-        return ctx_.currentFunction;
-    };
-    std::any VisitorImpl::visitFuncType(SysYParser::FuncTypeContext *context)
-    {
-        auto typeID = ir::PrimitiveDataType::TypeID::Void;
-        if (context->Void())
-        {
-            typeID = ir::PrimitiveDataType::TypeID::Void;
-        }
-        else if (context->Int())
-        {
-            typeID = ir::PrimitiveDataType::TypeID::Int32;
-        }
-        else if (context->Float())
-        {
-            typeID = ir::PrimitiveDataType::TypeID::Float32;
-        }
-        return typeID;
-    };
-    std::any VisitorImpl::visitFuncFparamList(SysYParser::FuncFparamListContext *context)
-    { // TODO
-        return 0;
-    };
-    std::any VisitorImpl::visitFuncFparam(SysYParser::FuncFparamContext *context)
-    { // TODO
-        return 0;
-    };
 
     std::any VisitorImpl::visitBlock(SysYParser::BlockContext *context)
     {
@@ -73,19 +27,35 @@ namespace front
         }
         return 0;
     };
+
     std::any VisitorImpl::visitAssignmentStmt(SysYParser::AssignmentStmtContext *context)
     {
-        auto left = std::any_cast<std::shared_ptr<ir::User>>(context->lVal()->accept(this));
-        auto right = std::any_cast<std::shared_ptr<ir::User>>(context->exp()->accept(this));
-        auto store = std::make_shared<ir::Store>(right, left);
-        ctx_.currentBasicBlock->addInstruction(store);
-        return std::dynamic_pointer_cast<ir::User>(store);
+        try
+        {
+            auto left = std::any_cast<std::shared_ptr<ir::User>>(context->lVal()->accept(this));
+            auto right = std::any_cast<std::shared_ptr<ir::User>>(context->exp()->accept(this));
+            auto store = std::make_shared<ir::Store>(right, left);
+            ctx_.currentBasicBlock->addInstruction(store);
+            return std::dynamic_pointer_cast<ir::User>(store);
+        }
+        catch (std::exception &e)
+        {
+            throw std::runtime_error("Error in visitAssignmentStmt:\n" + std::string(e.what()));
+        }
     };
+
     std::any VisitorImpl::visitExpStmt(SysYParser::ExpStmtContext *context)
     {
-        // context->exp()->accept(this);
-        return 0;
+        try
+        {
+            return std::any_cast<std::shared_ptr<ir::User>>(context->exp()->accept(this));
+        }
+        catch (std::exception &e)
+        {
+            throw std::runtime_error("Error in visitExpStmt:\n" + std::string(e.what()));
+        }
     };
+
     std::any VisitorImpl::visitBlockStmt(SysYParser::BlockStmtContext *context)
     {
         // Do nothing, just accept.

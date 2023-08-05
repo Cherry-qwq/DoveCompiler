@@ -13,11 +13,10 @@ namespace ir
         explicit StaticValue(std::shared_ptr<Type> type, std::string name, int32_t val) : User(type, std::to_string(val)), is_int_(true), int_val_(val) { value_type_ = ValueType::StaticValue; }
         explicit StaticValue(std::shared_ptr<Type> type, std::string name, float val) : User(type, std::to_string(val)), is_float_(true), float_val_(val) { value_type_ = ValueType::StaticValue; }
         explicit StaticValue(std::shared_ptr<Type> type, std::string name, bool val) : User(type, std::to_string(val)), is_bool_(true), bool_val_(val) { value_type_ = ValueType::StaticValue; }
-        explicit StaticValue(std::shared_ptr<Type> type, std::string name, std::vector<std::shared_ptr<StaticValue>> vals) : User(type, std::move(name)), is_array_(true), array_vals_(vals) { value_type_ = ValueType::StaticValue; }
         explicit StaticValue(std::string name, int32_t val) : User(MakePrimitiveDataType(PrimitiveDataType::TypeID::Int32), std::to_string(val)), is_int_(true), int_val_(val) { value_type_ = ValueType::StaticValue; }
         explicit StaticValue(std::string name, float val) : User(MakePrimitiveDataType(PrimitiveDataType::TypeID::Float32), std::to_string(val)), is_float_(true), float_val_(val) { value_type_ = ValueType::StaticValue; }
         explicit StaticValue(std::string name, bool val) : User(MakePrimitiveDataType(PrimitiveDataType::TypeID::Boolean), std::to_string(val)), is_bool_(true), bool_val_(val) { value_type_ = ValueType::StaticValue; }
-        explicit StaticValue(std::string name, std::vector<std::shared_ptr<StaticValue>> vals) : User(MakeArrayType(vals[0]->getType(), vals.size()), std::move(name)), is_array_(true), array_vals_(vals) { value_type_ = ValueType::StaticValue; }
+        explicit StaticValue(std::shared_ptr<Type> type, std::string name, std::vector<std::shared_ptr<StaticValue>> vals) : User(type, std::move(name)), is_array_(true), array_vals_(vals) { value_type_ = ValueType::StaticValue; }
         std::string dump(DumpHelper &helper) const override
         {
             std::string output = "";
@@ -95,35 +94,69 @@ namespace ir
 
         int32_t getInt() const
         {
-            return int_val_;
+            if (isInt())
+            {
+                return int_val_;
+            }
+            throw std::runtime_error("StaticValue::getInt() is not supported for non-int type");
         }
         float getFloat() const
         {
-            return float_val_;
+            if (isFloat())
+            {
+                return float_val_;
+            }
+            throw std::runtime_error("StaticValue::getFloat() is not supported for non-float type");
         }
         bool getBool() const
         {
-            return bool_val_;
+            if (isBool())
+            {
+                return bool_val_;
+            }
+            throw std::runtime_error("StaticValue::getBool() is not supported for non-bool type");
         }
         std::shared_ptr<StaticValue> at(size_t idx) const
         {
-            return array_vals_[idx];
+            if (isArray())
+            {
+                // array_vals is 1-D format for n-d arr, so we need to convert idx to 1-D
+                auto vals = std::vector<std::shared_ptr<StaticValue>>();
+                auto ele_len = std::dynamic_pointer_cast<ArrayType>(getType())->getElementType()->count();
+                for (size_t i = 0; i < ele_len; i++)
+                {
+                    vals.push_back(array_vals_[idx * ele_len + i]);
+                }
+                auto static_value = std::make_shared<StaticValue>(std::dynamic_pointer_cast<ArrayType>(getType())->getElementType(), getName(), vals);
+                return static_value;
+            }
+            throw std::runtime_error("StaticValue::at(size_t idx) is not supported for non-array type");
         }
         std::shared_ptr<StaticValue> at(std::vector<size_t> idxs) const
         {
-            auto val = array_vals_[idxs[0]];
-            if (val->isArray())
+            if (isArray())
             {
-                return val->at(std::vector<size_t>(idxs.begin() + 1, idxs.end()));
+                auto val = at(idxs[0]);
+                if (val->isArray())
+                {
+                    return val->at(std::vector<size_t>(idxs.begin() + 1, idxs.end()));
+                }
+                else
+                {
+                    if (idxs.size() != 0)
+                        throw std::runtime_error("StaticValue::at(std::vector<size_t> idxs) has more elements than array dimension");
+                    return val;
+                }
             }
-            else
-            {
-                return val;
-            }
+            throw std::runtime_error("StaticValue::at(std::vector<size_t> idxs) is not supported for non-array type");
         }
         std::vector<std::shared_ptr<StaticValue>> getArray() const
         {
-            return array_vals_;
+            if (isArray())
+            {
+                return array_vals_;
+            }
+            throw std::runtime_error("StaticValue::getArray() is not supported for non-array type");
         }
 
     protected:
@@ -134,6 +167,7 @@ namespace ir
         bool is_bool_ = false;
         bool bool_val_ = false;
         bool is_array_ = false;
+        // array_vals is 1-D format for n-d arr
         std::vector<std::shared_ptr<StaticValue>> array_vals_ = std::vector<std::shared_ptr<StaticValue>>(0);
     };
 

@@ -5,94 +5,117 @@ namespace front
 
     std::any VisitorImpl::visitVarDecl(SysYParser::VarDeclContext *context)
     {
-        context->bType()->accept(this);
-        auto allocates = std::vector<std::shared_ptr<ir::Allocate>>();
-        for (auto varDef : context->varDef())
+        try
         {
-            auto allocate = std::any_cast<std::shared_ptr<ir::Allocate>>(varDef->accept(this));
-            allocates.push_back(allocate);
+            context->bType()->accept(this);
+            auto allocates = std::vector<std::shared_ptr<ir::Allocate>>();
+            for (auto varDef : context->varDef())
+            {
+                auto allocate = std::any_cast<std::shared_ptr<ir::Allocate>>(varDef->accept(this));
+                allocates.push_back(allocate);
+            }
+            return allocates;
         }
-        return allocates;
+        catch (std::exception &e)
+        {
+            throw std::runtime_error("Error in visitVarDecl:\n" + std::string(e.what()));
+        }
     };
 
     std::any VisitorImpl::visitUnInitVarDef(SysYParser::UnInitVarDefContext *context)
     {
-        std::shared_ptr<ir::Allocate> allocate;
-        std::string varName = context->Identifier()->getSymbol()->getText();
-        std::shared_ptr<ir::Type> a_type = MakePrimitiveDataType(ctx_.currentDeclTypeId);
-
-        if (context->constExp().size() > 0)
+        try
         {
-            auto constExps = context->constExp();
-            std::reverse(constExps.begin(), constExps.end());
-            for (auto constExp : constExps)
+
+            std::shared_ptr<ir::Allocate> allocate;
+            std::string varName = context->Identifier()->getSymbol()->getText();
+            std::shared_ptr<ir::Type> a_type = MakePrimitiveDataType(ctx_.currentDeclTypeId);
+
+            if (context->constExp().size() > 0)
             {
-                // idx requests a StaticValue
-                auto size_sv = std::any_cast<std::shared_ptr<ir::StaticValue>>(constExp->accept(this));
-                assert(size_sv->isInt());
-                size_t size_val = size_sv->getInt();
-                a_type = MakeArrayType(a_type, size_val);
+                auto constExps = context->constExp();
+                std::reverse(constExps.begin(), constExps.end());
+                for (auto constExp : constExps)
+                {
+                    // idx requests a StaticValue
+                    auto size_sv = std::any_cast<std::shared_ptr<ir::StaticValue>>(constExp->accept(this));
+                    assert(size_sv->isInt());
+                    size_t size_val = size_sv->getInt();
+                    a_type = MakeArrayType(a_type, size_val);
+                }
             }
-        }
 
-        if (ctx_.symbolTable->getCurrentScope()->isGlobal())
-        {
-            // static init
-            std::shared_ptr<ir::StaticValue> initVal = ir::MakeEmptyStaticValue(a_type, varName);
-            allocate = std::make_shared<ir::Allocate>(varName, false, initVal);
-        }
-        else
-        {
-            allocate = std::make_shared<ir::Allocate>(a_type, varName);
-            ctx_.currentBasicBlock->addInstruction(allocate);
-        }
-        auto sym = std::make_shared<Symbol>(allocate->getName(), allocate);
-        ctx_.symbolTable->addSymbolToCurrentScope(allocate->getName(), sym);
+            if (ctx_.symbolTable->getCurrentScope()->isGlobal())
+            {
+                // static init
+                std::shared_ptr<ir::StaticValue> initVal = ir::MakeEmptyStaticValue(a_type, varName);
+                allocate = std::make_shared<ir::Allocate>(varName, false, initVal);
+            }
+            else
+            {
+                allocate = std::make_shared<ir::Allocate>(a_type, varName);
+                ctx_.currentBasicBlock->addInstruction(allocate);
+            }
+            auto sym = std::make_shared<Symbol>(allocate->getName(), allocate);
+            ctx_.symbolTable->addSymbolToCurrentScope(allocate->getName(), sym);
 
-        return allocate;
+            return allocate;
+        }
+        catch (std::exception &e)
+        {
+            throw std::runtime_error("Error in visitUnInitVarDef:\n" + std::string(e.what()));
+        }
     };
 
     std::any VisitorImpl::visitInitVarDef(SysYParser::InitVarDefContext *context)
     {
-        std::shared_ptr<ir::Allocate> allocate;
-        auto varName = context->Identifier()->getSymbol()->getText();
-        std::shared_ptr<ir::Type> a_type = MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32);
-
-        if (context->constExp().size() > 0)
+        try
         {
+            std::shared_ptr<ir::Allocate> allocate;
+            auto varName = context->Identifier()->getSymbol()->getText();
+            std::shared_ptr<ir::Type> a_type = MakePrimitiveDataType(ctx_.currentDeclTypeId);
 
-            for (auto constExp : context->constExp())
+            if (context->constExp().size() > 0)
             {
-                // idx requests a StaticValue
-                auto size_sv = std::any_cast<std::shared_ptr<ir::StaticValue>>(constExp->accept(this));
-                assert(size_sv->isInt());
-                size_t size_val = size_sv->getInt();
-                a_type = MakeArrayType(a_type, size_val);
+                auto constExps = context->constExp();
+                std::reverse(constExps.begin(), constExps.end());
+                for (auto constExp : constExps)
+                {
+                    // idx requests a StaticValue
+                    auto size_sv = std::any_cast<std::shared_ptr<ir::StaticValue>>(constExp->accept(this));
+                    assert(size_sv->isInt());
+                    size_t size_val = size_sv->getInt();
+                    a_type = MakeArrayType(a_type, size_val);
+                }
             }
-        }
 
-        if (ctx_.symbolTable->getCurrentScope()->isGlobal())
+            if (ctx_.symbolTable->getCurrentScope()->isGlobal())
+            {
+                // static init
+                std::shared_ptr<ir::StaticValue> initVal = ir::MakeEmptyStaticValue(a_type, varName);
+
+                ctx_.currentInitValue.push(initVal);
+                context->initVal()->accept(this);
+                ctx_.currentInitValue.pop();
+
+                allocate = std::make_shared<ir::Allocate>(varName, false, initVal);
+            }
+            else
+            {
+                allocate = std::make_shared<ir::Allocate>(a_type, varName);
+                ctx_.currentAllocate = allocate;
+                ctx_.currentBasicBlock->addInstruction(allocate);
+                context->initVal()->accept(this);
+            }
+            auto sym = std::make_shared<Symbol>(allocate->getName(), allocate);
+            ctx_.symbolTable->addSymbolToCurrentScope(allocate->getName(), sym);
+
+            return allocate;
+        }
+        catch (std::exception &e)
         {
-            // static init
-            std::shared_ptr<ir::StaticValue> initVal = ir::MakeEmptyStaticValue(a_type, varName);
-
-            ctx_.currentInitValue.push(initVal);
-            context->initVal()->accept(this);
-            ctx_.currentInitValue.pop();
-
-            allocate = std::make_shared<ir::Allocate>(varName, false, initVal);
+            throw std::runtime_error("Error in visitInitVarDef:\n" + std::string(e.what()));
         }
-        else
-        {
-            allocate = std::make_shared<ir::Allocate>(a_type, varName);
-            ctx_.currentAllocate = allocate;
-            ctx_.currentBasicBlock->addInstruction(allocate);
-            context->initVal()->accept(this);
-        }
-        auto sym = std::make_shared<Symbol>(allocate->getName(), allocate);
-        ctx_.symbolTable->addSymbolToCurrentScope(allocate->getName(), sym);
-
-        return allocate;
     };
 
     std::any VisitorImpl::visitScalarInitVal(SysYParser::ScalarInitValContext *context)
@@ -169,7 +192,7 @@ namespace front
                 ctx_.currentBasicBlock->addInstruction(store);
                 return std::dynamic_pointer_cast<ir::User>(store);
             }
-            else //sub var
+            else // sub var
             {
                 auto val = std::any_cast<std::shared_ptr<ir::User>>(context->exp()->accept(this));
                 auto store = std::make_shared<ir::Store>(val, ctx_.currentElementPtr);
@@ -206,7 +229,12 @@ namespace front
         }
         else
         {
-            // TODO add getelementptr and store
+            // for(auto initVal : context->initVal())
+            // {
+            //     auto getElementPtr = std::make_shared<ir::GetElementPtr>(ctx_.currentAllocate,);
+            //     ctx_.isElement = true;
+            //     initVal->accept(this);
+            // }
             return 0;
         }
         return 0;

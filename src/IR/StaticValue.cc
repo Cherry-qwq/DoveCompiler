@@ -7,11 +7,11 @@ namespace ir{
         if (type->isArray())
         {
             auto arr_type = std::dynamic_pointer_cast<ArrayType>(type);
-            auto arr_size = arr_type->getLen();
-            auto vals = std::vector<std::shared_ptr<StaticValue>>(arr_size);
-            for (size_t i = 0; i < arr_size; i++)
+            auto arr_count = arr_type->count();
+            auto vals = std::vector<std::shared_ptr<StaticValue>>(arr_count);
+            for (size_t i = 0; i < arr_count; i++)
             {
-                vals[i]=MakeEmptyStaticValue(arr_type->getElementType(), name);
+                vals[i]=MakeEmptyStaticValue(arr_type->getInternalType(), name);
             }
             return std::make_shared<StaticValue>(type, name, vals);
         }

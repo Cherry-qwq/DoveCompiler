@@ -13,7 +13,7 @@ namespace ir
         virtual std::shared_ptr<Type> copy() const = 0;
         virtual std::string dump() = 0;
         virtual size_t size() const = 0;
-
+        virtual size_t count() const = 0;
         bool isPrimitive() const
         {
             return is_primitive_;
@@ -56,6 +56,7 @@ namespace ir
         {
             return std::make_shared<PrimitiveDataType>(type_);
         }
+
         std::string dump()
         {
             switch (type_)
@@ -77,14 +78,17 @@ namespace ir
         {
             return type_ == TypeID::Int32;
         }
+
         bool isFloat() const
         {
             return type_ == TypeID::Float32;
         }
+
         bool isBool() const
         {
             return type_ == TypeID::Boolean;
         }
+
         bool isVoid() const
         {
             return type_ == TypeID::Void;
@@ -112,8 +116,14 @@ namespace ir
             }
         }
 
+        size_t count() const
+        {
+            return 1;
+        }
+        
     protected:
         TypeID type_;
+
     };
     std::shared_ptr<PrimitiveDataType> MakePrimitiveDataType(PrimitiveDataType::TypeID id);
 
@@ -143,6 +153,11 @@ namespace ir
         size_t size() const
         {
             return 8;
+        }
+
+        size_t count() const
+        {
+            return 1;
         }
 
         void setInternalType(std::shared_ptr<Type>);
@@ -193,6 +208,11 @@ namespace ir
         void setLen(size_t len)
         {
             len_ = len;
+        }
+
+        size_t count() const
+        {
+            return len_ * eltype_->count();
         }
 
         void setInternalType(std::shared_ptr<Type>);

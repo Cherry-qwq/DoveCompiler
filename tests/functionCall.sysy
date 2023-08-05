@@ -1,0 +1,41 @@
+
+
+int main(){
+    int n;
+    n = getint();
+}
+
+int main2(){
+    int a[10][10];
+    int n;
+    n = getarray(a[0]);
+}
+
+int main3(){
+    int n = 10;
+    putint(n);
+    putint(11);
+}
+
+int main4(){
+    int n = 2;
+    int a[2] = {2, 3};
+    putarray(n, a);
+}
+
+int main5() {
+    int n = getint();
+    putint(n + 4);
+    return 0;
+}
+
+int main6() {
+    int a = getch(), b;
+    b = getch();
+    putch(a);
+    putch(b);
+    putch(10);
+    putch(a - 16);
+    putch(b + 6);
+    return 0;
+}
