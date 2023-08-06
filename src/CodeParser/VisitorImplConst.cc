@@ -85,10 +85,6 @@ namespace front
                     {
                         init_target->setStaticValue(static_value->getFloat());
                     }
-                    else if (init_target->isBool())
-                    {
-                        init_target->setStaticValue(static_value->getBool());
-                    }
                 }
             }
             else if (init_target->isArray() && static_value->getType()->isPrimitive())
@@ -112,10 +108,6 @@ namespace front
                 else if (m_target->isFloat())
                 {
                     m_target->setStaticValue(static_value->getFloat());
-                }
-                else if (m_target->isBool())
-                {
-                    m_target->setStaticValue(static_value->getBool());
                 }
             }
             else

@@ -132,45 +132,6 @@ namespace front
         auto exit_label = std::make_shared<ir::Label>(exit_jplabel);
         auto out_exit_bb = ctx_.exitBasicBlock;
 
-        ctx_.symbolTable->pushScope("while");
-        ctx_.continueBBStack.push(entry_bb);
-        ctx_.breakBBStack.push(exit_bb);
-        ctx_.currentFunction->addBasicBlock(entry_bb);
-        ctx_.entryBasicBlock = ctx_.currentBasicBlock;
-        ctx_.currentBasicBlock = entry_bb;
-        ctx_.exitBasicBlock = exit_bb;
-        auto cond = std::any_cast<std::shared_ptr<ir::Value>>(context->cond()->accept(this));
-        std::shared_ptr<ir::Br> entry_br;
-        if (cond->getValueType() == ir::ValueType::StaticValue && false) //! for debug
-        {
-            if (cond->getType()->isPrimitive() && std::dynamic_pointer_cast<ir::PrimitiveDataType>(cond->getType())->isBool() && std::dynamic_pointer_cast<ir::StaticValue>(cond)->getBool())
-            {
-                entry_br = std::make_shared<ir::Br>(body_label, body_label->getName());
-            }
-            else
-            {
-                entry_br = std::make_shared<ir::Br>(exit_label, exit_label->getName());
-            }
-        }
-        else
-        {
-            entry_br = std::make_shared<ir::Br>(cond, body_label, exit_label, entry_label->getName());
-        }
-        ctx_.currentBasicBlock->addInstruction(entry_br);
-
-        ctx_.currentFunction->addBasicBlock(body_bb);
-        ctx_.currentBasicBlock = body_bb;
-        context->stmt()->accept(this);
-        auto body_br = std::make_shared<ir::Br>(entry_label, entry_label->getName());
-        ctx_.currentBasicBlock->addInstruction(body_br);
-        ctx_.continueBBStack.pop();
-        ctx_.breakBBStack.pop();
-        ctx_.symbolTable->popScope();
-
-        ctx_.currentFunction->addBasicBlock(exit_bb);
-        ctx_.entryBasicBlock = ctx_.currentBasicBlock;
-        ctx_.currentBasicBlock = exit_bb;
-        ctx_.exitBasicBlock = out_exit_bb;
 
         return 0;
     };
@@ -199,4 +160,211 @@ namespace front
         return std::dynamic_pointer_cast<ir::User>(ret);
     };
 
+    std::any VisitorImpl::visitRelToAddExp(SysYParser::RelToAddExpContext *context)
+    {
+        try
+        {
+            auto user = std::any_cast<std::shared_ptr<ir::User>>(context->addExp()->accept(this));
+            if (user->getType()->isPrimitive())
+            {
+                auto type = std::dynamic_pointer_cast<ir::PrimitiveDataType>(user->getType());
+                if (type->isInt())
+                {
+                    auto icmp = std::make_shared<ir::Icmp>(ir::Icmp::IcmpId::NE, user, std::make_shared<ir::StaticValue>("cmp_const", 0), user->getName() + "_icmp");
+                    ctx_.currentBasicBlock->addInstruction(icmp);
+                    return std::dynamic_pointer_cast<ir::User>(icmp);
+                }
+                else if (type->isFloat())
+                {
+                    auto fcmp = std::make_shared<ir::Fcmp>(ir::Fcmp::FcmpId::NE, user, std::make_shared<ir::StaticValue>("cmp_const", 0.0), user->getName() + "_fcmp");
+                    ctx_.currentBasicBlock->addInstruction(fcmp);
+                    return std::dynamic_pointer_cast<ir::User>(fcmp);
+                }
+            }
+            else
+            {
+                throw std::runtime_error("Rel must accept a Primitive Value");
+            }
+        }
+        catch (const std::exception &e)
+        {
+            throw std::runtime_error("Error in visitRelToAddExp:\n" + std::string(e.what()));
+        }
+    };
+
+    std::any VisitorImpl::visitRelTwoExp(SysYParser::RelTwoExpContext *context)
+    {
+        try
+        {
+            auto icmpid = ir::Icmp::IcmpId::LT;
+            auto fcmpid = ir::Fcmp::FcmpId::LT;
+            if (context->LT())
+            {
+                icmpid = ir::Icmp::IcmpId::LT;
+                fcmpid = ir::Fcmp::FcmpId::LT;
+            }
+            else if (context->LE())
+            {
+                icmpid = ir::Icmp::IcmpId::LE;
+                fcmpid = ir::Fcmp::FcmpId::LE;
+            }
+            else if (context->GT())
+            {
+                icmpid = ir::Icmp::IcmpId::GT;
+                fcmpid = ir::Fcmp::FcmpId::GT;
+            }
+            else if (context->GE())
+            {
+                icmpid = ir::Icmp::IcmpId::GE;
+                fcmpid = ir::Fcmp::FcmpId::GE;
+            }
+
+            auto left = std::any_cast<std::shared_ptr<ir::User>>(context->relExp()->accept(this));
+            auto right = std::any_cast<std::shared_ptr<ir::User>>(context->addExp()->accept(this));
+            if (left->isStaticValue() && right->isStaticValue())
+            {
+                if (left->getType()->isPrimitive() && right->getType()->isPrimitive())
+                {
+                    auto left_prim = std::dynamic_pointer_cast<ir::PrimitiveDataType>(left->getType());
+                    auto right_prim = std::dynamic_pointer_cast<ir::PrimitiveDataType>(right->getType());
+                    if (left_prim->isInt() && right_prim->isInt())
+                    {
+                        auto left_const = std::dynamic_pointer_cast<ir::StaticValue>(left);
+                        auto right_const = std::dynamic_pointer_cast<ir::StaticValue>(right);
+                        auto left_val = left_const->getInt();
+                        auto right_val = right_const->getInt();
+                        switch (icmpid)
+                        {
+                        case ir::Icmp::IcmpId::LT:
+                            return std::make_shared<ir::StaticValue>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), "Bool", left_val < right_val);
+                        case ir::Icmp::IcmpId::LE:
+                            return std::make_shared<ir::StaticValue>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), "Bool", left_val <= right_val);
+                        case ir::Icmp::IcmpId::GT:
+                            return std::make_shared<ir::StaticValue>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), "Bool", left_val > right_val);
+                        case ir::Icmp::IcmpId::GE:
+                            return std::make_shared<ir::StaticValue>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), "Bool", left_val >= right_val);
+                        default:
+                            throw std::runtime_error("Error in visitRelTwoExp: icmpid not found");
+                        }
+                    }
+                    else if (left_prim->isFloat() && right_prim->isFloat())
+                    {
+                        auto left_const = std::dynamic_pointer_cast<ir::StaticValue>(left);
+                        auto right_const = std::dynamic_pointer_cast<ir::StaticValue>(right);
+                        auto left_val = left_const->getFloat();
+                        auto right_val = right_const->getFloat();
+                        switch (fcmpid)
+                        {
+                        case ir::Fcmp::FcmpId::LT:
+                            return std::make_shared<ir::StaticValue>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), "Bool", left_val < right_val);
+                        case ir::Fcmp::FcmpId::LE:
+                            return std::make_shared<ir::StaticValue>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), "Bool", left_val <= right_val);
+                        case ir::Fcmp::FcmpId::GT:
+                            return std::make_shared<ir::StaticValue>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), "Bool", left_val > right_val);
+                        case ir::Fcmp::FcmpId::GE:
+                            return std::make_shared<ir::StaticValue>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), "Bool", left_val >= right_val);
+                        default:
+                            throw std::runtime_error("Error in visitRelTwoExp: fcmpid not found");
+                        }
+                    }
+                }
+                throw std::runtime_error("Error in visitRelTwoExp: left and right are not both int or float");
+            }
+            else
+            {
+                if (left->getType()->isPrimitive() && right->getType()->isPrimitive())
+                {
+                    auto left_prim = std::dynamic_pointer_cast<ir::PrimitiveDataType>(left->getType());
+                    auto right_prim = std::dynamic_pointer_cast<ir::PrimitiveDataType>(right->getType());
+                    if (left_prim->isInt() && right_prim->isInt())
+                    {
+                        auto icmp = std::make_shared<ir::Icmp>(icmpid, left, right, "slt");
+                        ctx_.currentBasicBlock->addInstruction(icmp);
+                        return std::dynamic_pointer_cast<ir::User>(icmp);
+                    }
+                    else if (left_prim->isFloat() && right_prim->isFloat())
+                    {
+                        auto fcmp = std::make_shared<ir::Fcmp>(fcmpid, left, right, "flt");
+                        ctx_.currentBasicBlock->addInstruction(fcmp);
+                        return std::dynamic_pointer_cast<ir::User>(fcmp);
+                    }
+                }
+                throw std::runtime_error("Error in visitRelTwoExp: left and right are not both int or float");
+            }
+        }
+        catch (const std::exception &e)
+        {
+            throw std::runtime_error("Error in visitRelTwoExp:\n" + std::string(e.what()));
+        }
+    };
+
+    std::any VisitorImpl::visitEqTwoExp(SysYParser::EqTwoExpContext *context)
+    {
+        try
+        {
+            
+        }
+        catch (const std::exception &e)
+        {
+            throw std::runtime_error("Error in visitEqTwoExp:\n" + std::string(e.what()));
+        }
+    };
+    std::any VisitorImpl::visitEqToRelExp(SysYParser::EqToRelExpContext *context)
+    {
+        try
+        {
+            return context->relExp()->accept(this);
+        }
+        catch (const std::exception &e)
+        {
+            throw std::runtime_error("Error in visitEqToRelExp:\n" + std::string(e.what()));
+        }
+    };
+    std::any VisitorImpl::visitLAndToEqExp(SysYParser::LAndToEqExpContext *context)
+    {
+        try
+        {
+        }
+        catch (const std::exception &e)
+        {
+            throw std::runtime_error("Error in visitLAndToEqExp:\n" + std::string(e.what()));
+        }
+    };
+    std::any VisitorImpl::visitLAndTwoExp(SysYParser::LAndTwoExpContext *context)
+    {
+        try
+        {
+            auto last = std::any_cast<std::shared_ptr<ir::User>>(context->eqExp()->accept(this));
+            auto bb = std::make_shared<ir::BasicBlock>(ctx_.currentFunction, ctx_.currentFunction->getName() + "_land");
+        }
+        catch (const std::exception &e)
+        {
+            throw std::runtime_error("Error in visitLAndTwoExp:\n" + std::string(e.what()));
+        }
+    };
+    std::any VisitorImpl::visitLOrToLandExp(SysYParser::LOrToLandExpContext *context)
+    {
+        try
+        {
+            auto val = std::make_shared<ir::StaticValue>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), "Bool", true);
+            return std::dynamic_pointer_cast<ir::User>(val);
+        }
+        catch (const std::exception &e)
+        {
+            throw std::runtime_error("Error in visitLOrToLandExp:\n" + std::string(e.what()));
+        }
+    };
+    std::any VisitorImpl::visitLOrTwoExp(SysYParser::LOrTwoExpContext *context)
+    {
+        try
+        {
+            auto last = std::any_cast<std::shared_ptr<ir::BasicBlock>>(context->lAndExp()->accept(this));
+            auto val = std::make_shared<ir::BasicBlock>(ctx_.currentFunction, "_if_lor_");
+            return std::dynamic_pointer_cast<ir::BasicBlock>(val);
+        }
+        catch (const std::exception &e)
+        {
+            throw std::runtime_error("Error in visitLOrTwoExp:\n" + std::string(e.what()));
+        }
+    };
 }

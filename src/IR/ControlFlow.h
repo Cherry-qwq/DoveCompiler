@@ -106,7 +106,7 @@ namespace ir
         };
 
         explicit Icmp(IcmpId cid, std::shared_ptr<Value> lhs, std::shared_ptr<Value> rhs, std::string name)
-            : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name), 2), lhs_(lhs, this), rhs_(rhs, this), comp_id_(cid)
+            : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), std::move(name), 2), lhs_(lhs, this), rhs_(rhs, this), comp_id_(cid)
         {
             value_type_ = ValueType::Icmp;
         };
@@ -160,7 +160,7 @@ namespace ir
         };
 
         explicit Fcmp(FcmpId cid, std::shared_ptr<Value> lhs, std::shared_ptr<Value> rhs, std::string name)
-            : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), std::move(name), 2), lhs_(lhs, this), rhs_(rhs, this), comp_id_(cid)
+            : Instruction(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), std::move(name), 2), lhs_(lhs, this), rhs_(rhs, this), comp_id_(cid)
         {
             value_type_ = ValueType::Fcmp;
         };

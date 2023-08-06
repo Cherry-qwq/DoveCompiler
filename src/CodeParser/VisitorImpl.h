@@ -42,6 +42,8 @@ namespace front
         std::shared_ptr<ir::BasicBlock> currentBasicBlock;
         std::shared_ptr<ir::BasicBlock> exitBasicBlock;
 
+        std::stack<std::shared_ptr<ir::BasicBlock>> trueTargetBBStack;
+        std::stack<std::shared_ptr<ir::BasicBlock>> falseTargetBBStack;
         std::stack<std::shared_ptr<ir::BasicBlock>> breakBBStack;
         std::stack<std::shared_ptr<ir::BasicBlock>> continueBBStack;
 

@@ -12,10 +12,8 @@ namespace ir
     public:
         explicit StaticValue(std::shared_ptr<Type> type, std::string name, int32_t val) : User(type, std::to_string(val)), is_int_(true), int_val_(val) { value_type_ = ValueType::StaticValue; }
         explicit StaticValue(std::shared_ptr<Type> type, std::string name, float val) : User(type, std::to_string(val)), is_float_(true), float_val_(val) { value_type_ = ValueType::StaticValue; }
-        explicit StaticValue(std::shared_ptr<Type> type, std::string name, bool val) : User(type, std::to_string(val)), is_bool_(true), bool_val_(val) { value_type_ = ValueType::StaticValue; }
         explicit StaticValue(std::string name, int32_t val) : User(MakePrimitiveDataType(PrimitiveDataType::TypeID::Int32), std::to_string(val)), is_int_(true), int_val_(val) { value_type_ = ValueType::StaticValue; }
         explicit StaticValue(std::string name, float val) : User(MakePrimitiveDataType(PrimitiveDataType::TypeID::Float32), std::to_string(val)), is_float_(true), float_val_(val) { value_type_ = ValueType::StaticValue; }
-        explicit StaticValue(std::string name, bool val) : User(MakePrimitiveDataType(PrimitiveDataType::TypeID::Boolean), std::to_string(val)), is_bool_(true), bool_val_(val) { value_type_ = ValueType::StaticValue; }
         explicit StaticValue(std::shared_ptr<Type> type, std::string name, std::vector<std::shared_ptr<StaticValue>> vals) : User(type, std::move(name)), is_array_(true), array_vals_(vals) { value_type_ = ValueType::StaticValue; }
         std::string dump(DumpHelper &helper) const override
         {
@@ -60,8 +58,14 @@ namespace ir
 
         void setStaticValue(bool val)
         {
-            setType(MakePrimitiveDataType(PrimitiveDataType::TypeID::Boolean));
-            bool_val_ = val;
+            if (val)
+            {
+                setStaticValue(1);
+            }
+            else
+            {
+                setStaticValue(0);
+            }
         }
 
         void setStaticValue(std::vector<std::shared_ptr<StaticValue>> vals)
@@ -83,10 +87,6 @@ namespace ir
             return type_->isPrimitive() && std::dynamic_pointer_cast<PrimitiveDataType>(type_)->isFloat();
         }
 
-        bool isBool() const
-        {
-            return type_->isPrimitive() && std::dynamic_pointer_cast<PrimitiveDataType>(type_)->isBool();
-        }
         bool isArray() const
         {
             return type_->isArray();
@@ -100,6 +100,7 @@ namespace ir
             }
             throw std::runtime_error("StaticValue::getInt() is not supported for non-int type");
         }
+
         float getFloat() const
         {
             if (isFloat())
@@ -108,14 +109,7 @@ namespace ir
             }
             throw std::runtime_error("StaticValue::getFloat() is not supported for non-float type");
         }
-        bool getBool() const
-        {
-            if (isBool())
-            {
-                return bool_val_;
-            }
-            throw std::runtime_error("StaticValue::getBool() is not supported for non-bool type");
-        }
+
         std::shared_ptr<StaticValue> at(size_t idx) const
         {
             if (isArray())

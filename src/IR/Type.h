@@ -40,7 +40,6 @@ namespace ir
         {
             Int32,
             Float32,
-            Boolean,
             Void,
         };
 
@@ -65,8 +64,6 @@ namespace ir
                 return "Int32";
             case TypeID::Float32:
                 return "Float32";
-            case TypeID::Boolean:
-                return "Boolean";
             case TypeID::Void:
                 return "Void";
             default:
@@ -82,11 +79,6 @@ namespace ir
         bool isFloat() const
         {
             return type_ == TypeID::Float32;
-        }
-
-        bool isBool() const
-        {
-            return type_ == TypeID::Boolean;
         }
 
         bool isVoid() const
@@ -107,8 +99,6 @@ namespace ir
                 return 4;
             case TypeID::Float32:
                 return 4;
-            case TypeID::Boolean:
-                return 1;
             case TypeID::Void:
                 return 0;
             default:
