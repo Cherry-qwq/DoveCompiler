@@ -45,3 +45,7 @@ test:
 
 test_show_ast: res/antlr/SysY.g4 res/antlr/CommonLex.g4
 	antlr4-parse res/antlr/SysY.g4 res/antlr/CommonLex.g4 compUnit tests/${testFileBase}.sysy -gui
+
+test_all:
+	mkdir -p build && cd build && cmake .. -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Build && make
+	build/bin/DoveCompiler tests/${testFileBase}.sysy -o tests/${testFileBase}.S ${options}
