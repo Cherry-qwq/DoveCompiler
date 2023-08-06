@@ -65,58 +65,86 @@ namespace front
 
     std::any VisitorImpl::visitCond(SysYParser::CondContext *context)
     {
-        return context->lOrExp()->accept(this);
+        context->lOrExp()->accept(this);
+        return 0;
     };
 
     std::any VisitorImpl::visitIfStmt(SysYParser::IfStmtContext *context)
     {
 
-        auto t_jplabel = std::make_shared<ir::JPLabel>("_" + ctx_.currentFunction->getName() + "_if_" + std::to_string(ctx_.basicBlockCounter.next()));
+        auto t_jplabel = std::make_shared<ir::JPLabel>("_" + ctx_.currentFunction->getName() + "_if_true_" + std::to_string(ctx_.basicBlockCounter.next()));
         auto exit_jplabel = std::make_shared<ir::JPLabel>("_" + ctx_.currentFunction->getName() + "_if_exit_" + std::to_string(ctx_.basicBlockCounter.next()));
         auto bb = std::make_shared<ir::BasicBlock>(t_jplabel, ir::BasicBlock::BlockType::IfTrue);
         auto exit_bb = std::make_shared<ir::BasicBlock>(exit_jplabel, ir::BasicBlock::BlockType::Default);
+        auto t_label = std::make_shared<ir::Label>(t_jplabel);
+        auto exit_label = std::make_shared<ir::Label>(exit_jplabel);
+        auto out_exit_bb = ctx_.exitBasicBlock;
+
+        ctx_.trueTargetBBStack.push(bb);
+        ctx_.falseTargetBBStack.push(exit_bb);
 
         ctx_.symbolTable->pushScope("if");
+        context->stmt()->accept(this);
+
         ctx_.currentFunction->addBasicBlock(bb);
         ctx_.entryBasicBlock = ctx_.currentBasicBlock;
         ctx_.currentBasicBlock = bb;
         ctx_.exitBasicBlock = exit_bb;
-        context->stmt()->accept(this);
         ctx_.symbolTable->popScope();
 
         ctx_.currentFunction->addBasicBlock(exit_bb);
         ctx_.entryBasicBlock = ctx_.currentBasicBlock;
         ctx_.currentBasicBlock = exit_bb;
+        ctx_.exitBasicBlock = out_exit_bb;
 
+        ctx_.trueTargetBBStack.pop();
+        ctx_.falseTargetBBStack.pop();
         return 0;
     };
     std::any VisitorImpl::visitIfElseStmt(SysYParser::IfElseStmtContext *context)
     {
 
-        auto t_jplabel = std::make_shared<ir::JPLabel>("_" + ctx_.currentFunction->getName() + "_if_" + std::to_string(ctx_.basicBlockCounter.next()));
-        auto f_jplabel = std::make_shared<ir::JPLabel>("_" + ctx_.currentFunction->getName() + "_else_" + std::to_string(ctx_.basicBlockCounter.next()));
+        auto t_jplabel = std::make_shared<ir::JPLabel>("_" + ctx_.currentFunction->getName() + "_if_true_" + std::to_string(ctx_.basicBlockCounter.next()));
+        auto f_jplabel = std::make_shared<ir::JPLabel>("_" + ctx_.currentFunction->getName() + "_if_false_" + std::to_string(ctx_.basicBlockCounter.next()));
         auto exit_jplabel = std::make_shared<ir::JPLabel>("_" + ctx_.currentFunction->getName() + "_if_exit_" + std::to_string(ctx_.basicBlockCounter.next()));
         auto bbt = std::make_shared<ir::BasicBlock>(t_jplabel, ir::BasicBlock::BlockType::IfTrue);
         auto bbf = std::make_shared<ir::BasicBlock>(f_jplabel, ir::BasicBlock::BlockType::IfFalse);
         auto exit_bb = std::make_shared<ir::BasicBlock>(exit_jplabel, ir::BasicBlock::BlockType::Default);
+        auto t_label = std::make_shared<ir::Label>(t_jplabel);
+        auto f_label = std::make_shared<ir::Label>(f_jplabel);
+        auto exit_label = std::make_shared<ir::Label>(exit_jplabel);
+        auto out_exit_bb = ctx_.exitBasicBlock;
+
+        ctx_.trueTargetBBStack.push(bbt);
+        ctx_.falseTargetBBStack.push(bbf);
 
         ctx_.symbolTable->pushScope("if");
         ctx_.currentFunction->addBasicBlock(bbt);
         ctx_.entryBasicBlock = ctx_.currentBasicBlock;
         ctx_.currentBasicBlock = bbt;
-        context->stmt(0)->accept(this);
+        ctx_.exitBasicBlock = exit_bb;
+        if (context->stmt(0))
+            context->stmt(0)->accept(this);
+        auto br = std::make_shared<ir::Br>(exit_label, exit_label->getName());
+        ctx_.currentBasicBlock->addInstruction(br);
         ctx_.symbolTable->popScope();
 
         ctx_.symbolTable->pushScope("else");
         ctx_.currentFunction->addBasicBlock(bbf);
+        ctx_.entryBasicBlock = ctx_.currentBasicBlock;
         ctx_.currentBasicBlock = bbf;
-        context->stmt(1)->accept(this);
+        ctx_.exitBasicBlock = exit_bb;
+        if (context->stmt(1))
+            context->stmt(1)->accept(this);
         ctx_.symbolTable->popScope();
 
         ctx_.currentFunction->addBasicBlock(exit_bb);
         ctx_.entryBasicBlock = ctx_.currentBasicBlock;
         ctx_.currentBasicBlock = exit_bb;
+        ctx_.exitBasicBlock = out_exit_bb;
 
+        ctx_.trueTargetBBStack.pop();
+        ctx_.falseTargetBBStack.pop();
         return 0;
     };
     std::any VisitorImpl::visitWhileStmt(SysYParser::WhileStmtContext *context)
@@ -131,6 +159,31 @@ namespace front
         auto body_label = std::make_shared<ir::Label>(body_jplabel);
         auto exit_label = std::make_shared<ir::Label>(exit_jplabel);
         auto out_exit_bb = ctx_.exitBasicBlock;
+
+        ctx_.breakBBStack.push(exit_bb);
+        ctx_.continueBBStack.push(entry_bb);
+
+        ctx_.currentFunction->addBasicBlock(entry_bb);
+        ctx_.entryBasicBlock = ctx_.currentBasicBlock;
+        ctx_.currentBasicBlock = entry_bb;
+        ctx_.exitBasicBlock = exit_bb;
+        context->cond()->accept(this);
+
+        ctx_.currentFunction->addBasicBlock(body_bb);
+        ctx_.entryBasicBlock = ctx_.currentBasicBlock;
+        ctx_.currentBasicBlock = body_bb;
+        ctx_.exitBasicBlock = exit_bb;
+        auto br = std::make_shared<ir::Br>(entry_label, entry_label->getName());
+        context->stmt()->accept(this);
+        ctx_.currentBasicBlock->addInstruction(br);
+
+        ctx_.currentFunction->addBasicBlock(exit_bb);
+        ctx_.entryBasicBlock = ctx_.currentBasicBlock;
+        ctx_.currentBasicBlock = exit_bb;
+        ctx_.exitBasicBlock = out_exit_bb;
+
+        ctx_.breakBBStack.pop();
+        ctx_.continueBBStack.pop();
 
         return 0;
     };
@@ -365,9 +418,19 @@ namespace front
     {
         try
         {
-            auto last = std::any_cast<std::shared_ptr<ir::User>>(context->eqExp()->accept(this));
-            auto bb = std::make_shared<ir::BasicBlock>("_if_land_");
+            auto t_bb = ctx_.trueTargetBBStack.top();
+            auto f_bb = ctx_.falseTargetBBStack.top();
+            auto t_label = std::make_shared<ir::Label>(t_bb->getJPLabel());
+            auto f_label = std::make_shared<ir::Label>(f_bb->getJPLabel());
+            auto bb = std::make_shared<ir::BasicBlock>("_if_lor_");
+
+            ctx_.falseTargetBBStack.push(bb);
+            auto user = std::any_cast<std::shared_ptr<ir::User>>(context->eqExp()->accept(this));
+            auto br = std::make_shared<ir::Br>(user, t_label, f_label, t_label->getName());
+            ctx_.currentBasicBlock->addInstruction(br);
             ctx_.currentFunction->addBasicBlock(bb);
+            ctx_.falseTargetBBStack.pop();
+
             return std::dynamic_pointer_cast<ir::BasicBlock>(bb);
         }
         catch (const std::exception &e)
@@ -379,9 +442,21 @@ namespace front
     {
         try
         {
-            auto last = std::any_cast<std::shared_ptr<ir::User>>(context->eqExp()->accept(this));
-            auto bb = std::make_shared<ir::BasicBlock>("_if_land_");
+            auto t_bb = ctx_.trueTargetBBStack.top();
+            auto f_bb = ctx_.falseTargetBBStack.top();
+            auto t_label = std::make_shared<ir::Label>(t_bb->getJPLabel());
+            auto f_label = std::make_shared<ir::Label>(f_bb->getJPLabel());
+            auto bb = std::make_shared<ir::BasicBlock>("_if_lor_");
+
+            ctx_.trueTargetBBStack.push(bb);
+            auto user = std::any_cast<std::shared_ptr<ir::User>>(context->eqExp()->accept(this));
+            auto br = std::make_shared<ir::Br>(user, t_label, f_label, t_label->getName());
+            ctx_.currentBasicBlock->addInstruction(br);
             ctx_.currentFunction->addBasicBlock(bb);
+
+            context->lAndExp()->accept(this);
+            ctx_.trueTargetBBStack.pop();
+
             return std::dynamic_pointer_cast<ir::BasicBlock>(bb);
         }
         catch (const std::exception &e)
@@ -407,9 +482,19 @@ namespace front
     {
         try
         {
-            auto last = std::any_cast<std::shared_ptr<ir::BasicBlock>>(context->lAndExp()->accept(this));
+            auto t_bb = ctx_.trueTargetBBStack.top();
+            auto f_bb = ctx_.falseTargetBBStack.top();
+            auto t_label = std::make_shared<ir::Label>(t_bb->getJPLabel());
+            auto f_label = std::make_shared<ir::Label>(f_bb->getJPLabel());
             auto bb = std::make_shared<ir::BasicBlock>("_if_lor_");
+
+            ctx_.falseTargetBBStack.push(bb);
+            context->lAndExp()->accept(this);
+            auto br = std::make_shared<ir::Br>(t_label, t_label->getName());
+            ctx_.currentBasicBlock->addInstruction(br);
             ctx_.currentFunction->addBasicBlock(bb);
+            ctx_.falseTargetBBStack.pop();
+
             return std::dynamic_pointer_cast<ir::BasicBlock>(bb);
         }
         catch (const std::exception &e)
