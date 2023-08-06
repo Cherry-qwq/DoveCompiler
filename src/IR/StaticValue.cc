@@ -1,7 +1,7 @@
 #include "StaticValue.h"
 
-
-namespace ir{
+namespace ir
+{
     std::shared_ptr<StaticValue> MakeEmptyStaticValue(std::shared_ptr<Type> type, std::string name)
     {
         if (type->isArray())
@@ -11,7 +11,7 @@ namespace ir{
             auto vals = std::vector<std::shared_ptr<StaticValue>>(arr_count);
             for (size_t i = 0; i < arr_count; i++)
             {
-                vals[i]=MakeEmptyStaticValue(arr_type->getInternalType(), name);
+                vals[i] = MakeEmptyStaticValue(arr_type->getInternalType(), name);
             }
             return std::make_shared<StaticValue>(type, name, vals);
         }
@@ -29,10 +29,6 @@ namespace ir{
             else if (prim_type->isFloat())
             {
                 return std::make_shared<StaticValue>(name, 0.0f);
-            }
-            else if (prim_type->isBool())
-            {
-                return std::make_shared<StaticValue>(name, false);
             }
             else
             {

@@ -132,7 +132,6 @@ namespace front
         auto exit_label = std::make_shared<ir::Label>(exit_jplabel);
         auto out_exit_bb = ctx_.exitBasicBlock;
 
-
         return 0;
     };
 
@@ -176,15 +175,12 @@ namespace front
                 }
                 else if (type->isFloat())
                 {
-                    auto fcmp = std::make_shared<ir::Fcmp>(ir::Fcmp::FcmpId::NE, user, std::make_shared<ir::StaticValue>("cmp_const", 0.0), user->getName() + "_fcmp");
+                    auto fcmp = std::make_shared<ir::Fcmp>(ir::Fcmp::FcmpId::NE, user, std::make_shared<ir::StaticValue>("cmp_const", 0.0f), user->getName() + "_fcmp");
                     ctx_.currentBasicBlock->addInstruction(fcmp);
                     return std::dynamic_pointer_cast<ir::User>(fcmp);
                 }
             }
-            else
-            {
-                throw std::runtime_error("Rel must accept a Primitive Value");
-            }
+            throw std::runtime_error("Rel must accept a Primitive Value");
         }
         catch (const std::exception &e)
         {
@@ -302,7 +298,52 @@ namespace front
     {
         try
         {
-            
+            auto left = std::any_cast<std::shared_ptr<ir::User>>(context->eqExp()->accept(this));
+            auto right = std::any_cast<std::shared_ptr<ir::User>>(context->relExp()->accept(this));
+            if (left->getType()->isPrimitive() && right->getType()->isPrimitive())
+            {
+                if (left->isStaticValue() && right->isStaticValue())
+                {
+                    auto left_prim = std::dynamic_pointer_cast<ir::PrimitiveDataType>(left->getType());
+                    auto right_prim = std::dynamic_pointer_cast<ir::PrimitiveDataType>(right->getType());
+                    if (left_prim->isInt() && right_prim->isInt())
+                    {
+                        auto left_const = std::dynamic_pointer_cast<ir::StaticValue>(left);
+                        auto right_const = std::dynamic_pointer_cast<ir::StaticValue>(right);
+                        auto left_val = left_const->getInt();
+                        auto right_val = right_const->getInt();
+                        auto result = std::make_shared<ir::StaticValue>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), "eq", left_val == right_val);
+                        return std::dynamic_pointer_cast<ir::User>(result);
+                    }
+                    else if (left_prim->isFloat() && right_prim->isFloat())
+                    {
+                        auto left_const = std::dynamic_pointer_cast<ir::StaticValue>(left);
+                        auto right_const = std::dynamic_pointer_cast<ir::StaticValue>(right);
+                        auto left_val = left_const->getFloat();
+                        auto right_val = right_const->getFloat();
+                        auto result = std::make_shared<ir::StaticValue>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), "eq", left_val == right_val);
+                        return std::dynamic_pointer_cast<ir::User>(result);
+                    }
+                }
+                else
+                {
+                    auto left_prim = std::dynamic_pointer_cast<ir::PrimitiveDataType>(left->getType());
+                    auto right_prim = std::dynamic_pointer_cast<ir::PrimitiveDataType>(right->getType());
+                    if (left_prim->isInt() && right_prim->isInt())
+                    {
+                        auto icmp = std::make_shared<ir::Icmp>(ir::Icmp::IcmpId::EQ, left, right, "eq");
+                        ctx_.currentBasicBlock->addInstruction(icmp);
+                        return std::dynamic_pointer_cast<ir::User>(icmp);
+                    }
+                    else if (left_prim->isFloat() && right_prim->isFloat())
+                    {
+                        auto fcmp = std::make_shared<ir::Fcmp>(ir::Fcmp::FcmpId::EQ, left, right, "eq");
+                        ctx_.currentBasicBlock->addInstruction(fcmp);
+                        return std::dynamic_pointer_cast<ir::User>(fcmp);
+                    }
+                }
+            }
+            throw std::runtime_error("left and right are not both primitive");
         }
         catch (const std::exception &e)
         {
@@ -324,6 +365,10 @@ namespace front
     {
         try
         {
+            auto last = std::any_cast<std::shared_ptr<ir::User>>(context->eqExp()->accept(this));
+            auto bb = std::make_shared<ir::BasicBlock>("_if_land_");
+            ctx_.currentFunction->addBasicBlock(bb);
+            return std::dynamic_pointer_cast<ir::BasicBlock>(bb);
         }
         catch (const std::exception &e)
         {
@@ -335,7 +380,9 @@ namespace front
         try
         {
             auto last = std::any_cast<std::shared_ptr<ir::User>>(context->eqExp()->accept(this));
-            auto bb = std::make_shared<ir::BasicBlock>(ctx_.currentFunction, ctx_.currentFunction->getName() + "_land");
+            auto bb = std::make_shared<ir::BasicBlock>("_if_land_");
+            ctx_.currentFunction->addBasicBlock(bb);
+            return std::dynamic_pointer_cast<ir::BasicBlock>(bb);
         }
         catch (const std::exception &e)
         {
@@ -346,8 +393,10 @@ namespace front
     {
         try
         {
-            auto val = std::make_shared<ir::StaticValue>(ir::MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Int32), "Bool", true);
-            return std::dynamic_pointer_cast<ir::User>(val);
+            auto last = std::any_cast<std::shared_ptr<ir::User>>(context->lAndExp()->accept(this));
+            auto bb = std::make_shared<ir::BasicBlock>("_if_lor_");
+            ctx_.currentFunction->addBasicBlock(bb);
+            return std::dynamic_pointer_cast<ir::BasicBlock>(bb);
         }
         catch (const std::exception &e)
         {
@@ -359,8 +408,9 @@ namespace front
         try
         {
             auto last = std::any_cast<std::shared_ptr<ir::BasicBlock>>(context->lAndExp()->accept(this));
-            auto val = std::make_shared<ir::BasicBlock>(ctx_.currentFunction, "_if_lor_");
-            return std::dynamic_pointer_cast<ir::BasicBlock>(val);
+            auto bb = std::make_shared<ir::BasicBlock>("_if_lor_");
+            ctx_.currentFunction->addBasicBlock(bb);
+            return std::dynamic_pointer_cast<ir::BasicBlock>(bb);
         }
         catch (const std::exception &e)
         {

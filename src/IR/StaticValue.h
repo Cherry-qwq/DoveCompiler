@@ -26,10 +26,6 @@ namespace ir
             {
                 output += std::to_string(float_val_);
             }
-            else if (is_bool_)
-            {
-                output += std::to_string(bool_val_);
-            }
             else if (is_array_)
             {
                 output += "[";
@@ -158,8 +154,6 @@ namespace ir
         int32_t int_val_ = 0;
         bool is_float_ = false;
         float float_val_ = .0f;
-        bool is_bool_ = false;
-        bool bool_val_ = false;
         bool is_array_ = false;
         // array_vals is 1-D format for n-d arr
         std::vector<std::shared_ptr<StaticValue>> array_vals_ = std::vector<std::shared_ptr<StaticValue>>(0);
