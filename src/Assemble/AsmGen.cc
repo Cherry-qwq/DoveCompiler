@@ -1,3 +1,4 @@
+#include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -16,22 +17,40 @@ namespace asmgen
     void AsmGenerator::genCompUnit(std::shared_ptr<ir::CompUnit> node)
     {
         auto global_objects = node->getGlobalObjects();
-        for(auto global_object : *global_objects)
+        for (auto global_object : *global_objects)
         {
-            if(global_object.getValue()->getValueType() == ir::ValueType::Function)
+            if (global_object.getValue()->getValueType() == ir::ValueType::Function)
             {
                 auto function = std::dynamic_pointer_cast<ir::Function>(global_object.getValue());
-                s_ << function->getName() << ":" << std::endl;
+                text_ << function->getName() << ":" << std::endl;
                 auto basic_blocks = function->getBasicBlocks();
-                for(auto basic_block : *basic_blocks)
+                for (auto basic_block : *basic_blocks)
                 {
-                    s_ << basic_block->getName() << ":" << std::endl;
+                    text_ << basic_block->getName() << ":" << std::endl;
                     auto instructions = basic_block->getInstructions();
                 }
-            }else if(global_object.getValue()->getValueType() == ir::ValueType::Allocate){
+            }
+            else if (global_object.getValue()->getValueType() == ir::ValueType::Allocate)
+            {
+                auto allocate = std::dynamic_pointer_cast<ir::Allocate>(global_object.getValue());
+                if(allocate->isConst()){
+                    data_ << allocate->getName() << ":" << std::endl;
+                    data_ << ".word " << allocate->getInitValue()->getName() << std::endl;
+                }else{
 
+                }
             }
         }
+    }
+
+    void AsmGenerator::construct()
+    {
+        s_ << ".data" << std::endl;
+        s_ << data_.str() << std::endl;
+        s_ << ".bss" << std::endl;
+        s_ << bss_.str() << std::endl;
+        s_ << ".text" << std::endl;
+        s_ << text_.str() << std::endl;
     }
 
     std::string AsmGenerator::exportToString()

@@ -19,11 +19,17 @@ namespace asmgen
     void genCompUnit(std::shared_ptr<ir::CompUnit> node);
 
     void generate();
+
+    void construct();
+
     std::string exportToString();
 
     void exportToFile(std::string path);
   protected:
     std::shared_ptr<ir::CompUnit> comp_unit_;
     std::stringstream s_;
+    std::stringstream data_;
+    std::stringstream bss_;
+    std::stringstream text_;
   };
 }

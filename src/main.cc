@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
     auto sstream = std::stringstream();
     auto source = std::ifstream();
     source.open(config::get().src_file_path);
-    // sstream << CONSTANTS::kPrebuiltDecl << std::endl;
+    sstream << CONSTANTS::kPrebuiltDecl << std::endl;
     sstream << source.rdbuf();
 
     antlr4::ANTLRInputStream input(sstream);
