@@ -14,6 +14,10 @@ namespace asmgen
     AsmGenerator(std::shared_ptr<ir::CompUnit> comp_unit) : comp_unit_(comp_unit){};
     ~AsmGenerator() = default;
 
+    
+
+    void genCompUnit(std::shared_ptr<ir::CompUnit> node);
+
     void generate();
     std::string exportToString();
 

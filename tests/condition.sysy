@@ -46,7 +46,8 @@ int main3() {
 int main4() {
     int a;
     a = 10;
-    if (+-!!!a) {
+    int b=1;
+    if (+-!!!a||a==b) {
         a = - - -1;
     }
     else {

@@ -80,7 +80,7 @@ namespace ir
             global_objects_.push_back(Use(std::move(global_object), this));
         }
 
-        std::shared_ptr<std::vector<Use>> getGlobalObject()
+        std::shared_ptr<std::vector<Use>> getGlobalObjects()
         {
             return std::make_shared<std::vector<Use>>(global_objects_);
         }
@@ -312,7 +312,7 @@ namespace ir
             std::string output = "Br ";
             if (has_condition_)
             {
-                output += condition_.getValue()->dump(helper) + ", " + t_label_.getValue()->dump(helper) + ", " + f_label_.getValue()->dump(helper) + " ";
+                output += condition_.getValue()->getName() + ", " + t_label_.getValue()->getName() + ", " + f_label_.getValue()->getName() + " ";
             }
             else
             {

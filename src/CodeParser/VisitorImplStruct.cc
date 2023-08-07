@@ -65,8 +65,16 @@ namespace front
 
     std::any VisitorImpl::visitCond(SysYParser::CondContext *context)
     {
-        context->lOrExp()->accept(this);
-        return 0;
+        try
+        {
+
+            context->lOrExp()->accept(this);
+            return 0;
+        }
+        catch (std::exception &e)
+        {
+            throw std::runtime_error("Error in visitCond:\n" + std::string(e.what()));
+        }
     };
 
     std::any VisitorImpl::visitIfStmt(SysYParser::IfStmtContext *context)
@@ -84,12 +92,13 @@ namespace front
         ctx_.falseTargetBBStack.push(exit_bb);
 
         ctx_.symbolTable->pushScope("if");
-        context->stmt()->accept(this);
+        context->cond()->accept(this);
 
         ctx_.currentFunction->addBasicBlock(bb);
         ctx_.entryBasicBlock = ctx_.currentBasicBlock;
         ctx_.currentBasicBlock = bb;
         ctx_.exitBasicBlock = exit_bb;
+        context->stmt()->accept(this);
         ctx_.symbolTable->popScope();
 
         ctx_.currentFunction->addBasicBlock(exit_bb);
@@ -119,6 +128,8 @@ namespace front
         ctx_.falseTargetBBStack.push(bbf);
 
         ctx_.symbolTable->pushScope("if");
+        context->cond()->accept(this);
+
         ctx_.currentFunction->addBasicBlock(bbt);
         ctx_.entryBasicBlock = ctx_.currentBasicBlock;
         ctx_.currentBasicBlock = bbt;
@@ -131,7 +142,6 @@ namespace front
 
         ctx_.symbolTable->pushScope("else");
         ctx_.currentFunction->addBasicBlock(bbf);
-        ctx_.entryBasicBlock = ctx_.currentBasicBlock;
         ctx_.currentBasicBlock = bbf;
         ctx_.exitBasicBlock = exit_bb;
         if (context->stmt(1))
@@ -222,15 +232,14 @@ namespace front
                 auto type = std::dynamic_pointer_cast<ir::PrimitiveDataType>(user->getType());
                 if (type->isInt())
                 {
-                    auto icmp = std::make_shared<ir::Icmp>(ir::Icmp::IcmpId::NE, user, std::make_shared<ir::StaticValue>("cmp_const", 0), user->getName() + "_icmp");
-                    ctx_.currentBasicBlock->addInstruction(icmp);
-                    return std::dynamic_pointer_cast<ir::User>(icmp);
+                    return std::dynamic_pointer_cast<ir::User>(user);
                 }
                 else if (type->isFloat())
                 {
-                    auto fcmp = std::make_shared<ir::Fcmp>(ir::Fcmp::FcmpId::NE, user, std::make_shared<ir::StaticValue>("cmp_const", 0.0f), user->getName() + "_fcmp");
-                    ctx_.currentBasicBlock->addInstruction(fcmp);
-                    return std::dynamic_pointer_cast<ir::User>(fcmp);
+                    // float to int
+                    // auto fptosi = std::make_shared<ir::Fptosi>(user, user->getName());
+                    // return std::dynamic_pointer_cast<ir::User>(user);
+                    return 0;
                 }
             }
             throw std::runtime_error("Rel must accept a Primitive Value");
@@ -422,14 +431,15 @@ namespace front
             auto f_bb = ctx_.falseTargetBBStack.top();
             auto t_label = std::make_shared<ir::Label>(t_bb->getJPLabel());
             auto f_label = std::make_shared<ir::Label>(f_bb->getJPLabel());
-            auto bb = std::make_shared<ir::BasicBlock>("_if_lor_");
+            auto bb = std::make_shared<ir::BasicBlock>("_lAnd_exit_" + std::to_string(ctx_.basicBlockCounter.next()), ir::BasicBlock::BlockType::Default);
 
-            ctx_.falseTargetBBStack.push(bb);
-            auto user = std::any_cast<std::shared_ptr<ir::User>>(context->eqExp()->accept(this));
+            auto user = std::any_cast<std::shared_ptr<ir::User>>(context->eqExp()->accept(this)); // Icmp, Fcmp or int StatciValue
             auto br = std::make_shared<ir::Br>(user, t_label, f_label, t_label->getName());
             ctx_.currentBasicBlock->addInstruction(br);
+
             ctx_.currentFunction->addBasicBlock(bb);
-            ctx_.falseTargetBBStack.pop();
+            ctx_.entryBasicBlock = ctx_.currentBasicBlock;
+            ctx_.currentBasicBlock = bb;
 
             return std::dynamic_pointer_cast<ir::BasicBlock>(bb);
         }
@@ -446,16 +456,19 @@ namespace front
             auto f_bb = ctx_.falseTargetBBStack.top();
             auto t_label = std::make_shared<ir::Label>(t_bb->getJPLabel());
             auto f_label = std::make_shared<ir::Label>(f_bb->getJPLabel());
-            auto bb = std::make_shared<ir::BasicBlock>("_if_lor_");
+            auto bb = std::make_shared<ir::BasicBlock>("_lAnd_exit_" + std::to_string(ctx_.basicBlockCounter.next()), ir::BasicBlock::BlockType::Default);
 
             ctx_.trueTargetBBStack.push(bb);
-            auto user = std::any_cast<std::shared_ptr<ir::User>>(context->eqExp()->accept(this));
-            auto br = std::make_shared<ir::Br>(user, t_label, f_label, t_label->getName());
-            ctx_.currentBasicBlock->addInstruction(br);
-            ctx_.currentFunction->addBasicBlock(bb);
-
             context->lAndExp()->accept(this);
             ctx_.trueTargetBBStack.pop();
+
+            auto user = std::any_cast<std::shared_ptr<ir::User>>(context->eqExp()->accept(this)); // Icmp, Fcmp or int StatciValue
+            auto br = std::make_shared<ir::Br>(user, t_label, f_label, t_label->getName());
+            ctx_.currentBasicBlock->addInstruction(br);
+
+            ctx_.currentFunction->addBasicBlock(bb);
+            ctx_.entryBasicBlock = ctx_.currentBasicBlock;
+            ctx_.currentBasicBlock = bb;
 
             return std::dynamic_pointer_cast<ir::BasicBlock>(bb);
         }
@@ -468,10 +481,9 @@ namespace front
     {
         try
         {
-            auto last = std::any_cast<std::shared_ptr<ir::User>>(context->lAndExp()->accept(this));
-            auto bb = std::make_shared<ir::BasicBlock>("_if_lor_");
-            ctx_.currentFunction->addBasicBlock(bb);
-            return std::dynamic_pointer_cast<ir::BasicBlock>(bb);
+            context->lAndExp()->accept(this);
+
+            return 0;
         }
         catch (const std::exception &e)
         {
@@ -482,20 +494,18 @@ namespace front
     {
         try
         {
-            auto t_bb = ctx_.trueTargetBBStack.top();
-            auto f_bb = ctx_.falseTargetBBStack.top();
-            auto t_label = std::make_shared<ir::Label>(t_bb->getJPLabel());
-            auto f_label = std::make_shared<ir::Label>(f_bb->getJPLabel());
-            auto bb = std::make_shared<ir::BasicBlock>("_if_lor_");
+            auto bb = std::make_shared<ir::BasicBlock>("_lOr_exit_" + std::to_string(ctx_.basicBlockCounter.next()), ir::BasicBlock::BlockType::Default);
 
             ctx_.falseTargetBBStack.push(bb);
-            context->lAndExp()->accept(this);
-            auto br = std::make_shared<ir::Br>(t_label, t_label->getName());
-            ctx_.currentBasicBlock->addInstruction(br);
-            ctx_.currentFunction->addBasicBlock(bb);
+            context->lOrExp()->accept(this);
             ctx_.falseTargetBBStack.pop();
 
-            return std::dynamic_pointer_cast<ir::BasicBlock>(bb);
+            ctx_.currentFunction->addBasicBlock(bb);
+            ctx_.entryBasicBlock = ctx_.currentBasicBlock;
+            ctx_.currentBasicBlock = bb;
+            context->lAndExp()->accept(this);
+
+            return 0;
         }
         catch (const std::exception &e)
         {

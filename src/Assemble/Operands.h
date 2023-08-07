@@ -1,3 +1,4 @@
+#include <cstdint>
 
 namespace asmgen
 {
@@ -14,10 +15,17 @@ namespace asmgen
 
     class Operand
     {
-    protected:
-        static int cnt;
-
     public:
+        void setCount(int32_t count)
+        {
+            cnt = count;
+        };
+
+        int getCount() const
+        {
+            return cnt;
+        };
+
         const int id;
 
         Operand();
@@ -25,8 +33,9 @@ namespace asmgen
         virtual OperandType getOpndType() const { return OperandType::Error; };
 
         virtual ~Operand() = default;
-    };
 
-    
+    protected:
+        int cnt;
+    };
 
 }
