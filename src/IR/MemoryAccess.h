@@ -80,7 +80,7 @@ namespace ir
     class Store : public Instruction
     {
     public:
-        Store(std::shared_ptr<Value> val, std::shared_ptr<Value> ptr) : Instruction(MakePrimitiveDataType(PrimitiveDataType::TypeID::Void), "Store", 2), val_(val, this), ptr_(ptr, this){};
+        Store(std::shared_ptr<Value> val, std::shared_ptr<Value> ptr) : Instruction(MakePrimitiveDataType(PrimitiveDataType::TypeID::Void), "Store", 2), val_(val, this), ptr_(ptr, this){value_type_==ValueType::Store;};
 
         std::string dump(DumpHelper &helper) const override
         {
@@ -103,6 +103,7 @@ namespace ir
             {
                 idx_.push_back(Use(i, this));
             }
+            value_type_=ValueType::GetElementPtr;
         };
         std::string dump(DumpHelper &helper) const
         {

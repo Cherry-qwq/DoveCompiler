@@ -11,7 +11,7 @@ namespace ir
     {
     public:
         BinaryOperator(std::shared_ptr<Type> type, std::string name)
-            : Instruction(std::move(type), std::move(name), 2){};
+            : Instruction(std::move(type), std::move(name), 2){value_type_=ValueType::BinaryOperator;};
     };
 
     class Add : public Instruction
@@ -32,6 +32,7 @@ namespace ir
             {
                 throw std::runtime_error("Add: Invalid operand types");
             }
+            value_type_=ValueType::Add;
         };
         std::string dump(DumpHelper &helper) const override
         {
@@ -59,6 +60,7 @@ namespace ir
             {
                 throw std::runtime_error("FAdd: Invalid operand types");
             }
+            value_type_=ValueType::FAdd;
         };
         std::string dump(DumpHelper &helper) const override
         {
@@ -86,6 +88,7 @@ namespace ir
                     throw std::runtime_error("Sub: Invalid operand types");
                 }
             }
+            value_type_=ValueType::Sub;
         };
         std::string dump(DumpHelper &helper) const override
         {
@@ -113,6 +116,7 @@ namespace ir
                     throw std::runtime_error("FSub: Invalid operand types");
                 }
             }
+            value_type_=ValueType::FSub;
         };
         std::string dump(DumpHelper &helper) const override
         {
@@ -140,6 +144,7 @@ namespace ir
                     throw std::runtime_error("Mul: Invalid operand types");
                 }
             }
+            value_type_=ValueType::Mul;
         };
         std::string dump(DumpHelper &helper) const override
         {
@@ -167,6 +172,7 @@ namespace ir
                     throw std::runtime_error("FMul: Invalid operand types");
                 }
             }
+            value_type_=ValueType::FMul;
         };
         std::string dump(DumpHelper &helper) const override
         {
@@ -194,6 +200,7 @@ namespace ir
                     throw std::runtime_error("SDiv: Invalid operand types");
                 }
             }
+            value_type_=ValueType::SDiv;
         };
         std::string dump(DumpHelper &helper) const override
         {
@@ -221,6 +228,7 @@ namespace ir
                     throw std::runtime_error("FDiv: Invalid operand types");
                 }
             }
+            value_type_=ValueType::FDiv;
         };
         std::string dump(DumpHelper &helper) const override
         {
@@ -248,6 +256,7 @@ namespace ir
                     throw std::runtime_error("SRem: Invalid operand types");
                 }
             }
+            value_type_=ValueType::SRem;
         };
         std::string dump(DumpHelper &helper) const override
         {
