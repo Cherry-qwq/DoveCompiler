@@ -22,9 +22,9 @@ namespace ir
 
     };
 
-    explicit BasicBlock(const std::string &name) : BasicBlock(name, BlockType::FunctionEntry){};
-    explicit BasicBlock(const std::string &name, BlockType type) : BasicBlock(std::make_shared<JPLabel>(name), type){};
-    explicit BasicBlock(std::shared_ptr<JPLabel> jplabel, BlockType type) : User(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), jplabel->getName()), jplabel_(jplabel), block_type_(type){};
+    explicit BasicBlock(const std::string &name) : BasicBlock(name, BlockType::FunctionEntry){value_type_=ValueType::BasicBlock;};
+    explicit BasicBlock(const std::string &name, BlockType type) : BasicBlock(std::make_shared<JPLabel>(name), type){value_type_=ValueType::BasicBlock;};
+    explicit BasicBlock(std::shared_ptr<JPLabel> jplabel, BlockType type) : User(MakePrimitiveDataType(ir::PrimitiveDataType::TypeID::Void), jplabel->getName()), jplabel_(jplabel), block_type_(type){value_type_=ValueType::BasicBlock;};
     std::string getStringifyBlockType() const
     {
       switch (block_type_)

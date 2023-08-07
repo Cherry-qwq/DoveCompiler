@@ -8,7 +8,7 @@ namespace ir
     {
     public:
         ZExt(std::shared_ptr<Value> src, std::shared_ptr<Value> dst, std::shared_ptr<Type> targetType)
-            : Instruction(targetType, src->getName(), 1), src_(src, this), targetType_(targetType){};
+            : Instruction(targetType, src->getName(), 1), src_(src, this), targetType_(targetType){value_type_=ValueType::ZExt;};
 
     protected:
         Use src_;
@@ -24,7 +24,7 @@ namespace ir
     {
     public:
         explicit ConversionOp(std::shared_ptr<Value> src, std::shared_ptr<Value> dst, std::shared_ptr<Type> targetType)
-            : Instruction(targetType, src->getName(), 1), src_(src, this), targetType_(targetType){};
+            : Instruction(targetType, src->getName(), 1), src_(src, this), targetType_(targetType){value_type_=ValueType::ConversionOp;};
 
     protected:
         Use src_;
