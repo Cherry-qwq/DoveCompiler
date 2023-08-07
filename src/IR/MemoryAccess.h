@@ -65,7 +65,7 @@ namespace ir
     class Load : public Instruction
     {
     public:
-        Load(std::shared_ptr<Value> ptr, std::string name) : Instruction(std::dynamic_pointer_cast<PointerType>(ptr->getType())->getReferenceType(), std::move(name), 1), ptr_(ptr, this){};
+        Load(std::shared_ptr<Value> ptr, std::string name) : Instruction(std::dynamic_pointer_cast<PointerType>(ptr->getType())->getReferenceType(), std::move(name), 1), ptr_(ptr, this){ value_type_ = ValueType::Load;};
         std::string dump(DumpHelper &helper) const override
         {
             std::string output = "Load " + ptr_.getValue()->getName();
@@ -121,11 +121,4 @@ namespace ir
         std::vector<Use> idx_;
     };
 
-    class ExtractValue : public Instruction
-    {
-    };
-
-    class InsertValue : public Instruction
-    {
-    };
 }

@@ -260,13 +260,6 @@ namespace ir
         std::shared_ptr<JPLabel> jplabel_;
     };
 
-    class Phi : public Instruction
-    {
-        // TODO
-    protected:
-        std::map<std::shared_ptr<JPLabel>, std::shared_ptr<Value>> vecPair;
-    };
-
     class Call : public Instruction
     {
     public:

@@ -30,7 +30,6 @@ namespace ir
             Fcmp,
             Return,
             Br,
-            Phi,
             Call,
             JPLabel,
             Label,
