@@ -54,10 +54,10 @@ namespace front
                 throw std::runtime_error("constDef must have initVal");
             }
 
-            allocate = std::make_shared<ir::Allocate>(name, true, initVal);
+            allocate = std::make_shared<ir::Allocate>("%" + name, true, initVal);
             allocate->setGlobal(ctx_.symbolTable->getCurrentScope()->isGlobal());
             auto sym = std::make_shared<Symbol>(allocate->getName(), allocate);
-            ctx_.symbolTable->addSymbolToCurrentScope(allocate->getName(), sym);
+            ctx_.symbolTable->addSymbolToCurrentScope(name, sym);
 
             return allocate;
         }

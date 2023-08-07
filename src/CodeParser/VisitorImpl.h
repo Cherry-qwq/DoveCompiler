@@ -48,6 +48,12 @@ namespace front
         std::stack<std::shared_ptr<ir::BasicBlock>> continueBBStack;
 
         utils::Counter basicBlockCounter = utils::Counter(0);
+        utils::Counter vRegCounter = utils::Counter(0);
+
+        std::string newVRegName()
+        {
+            return "%" + std::to_string(vRegCounter.next());
+        }
 
         std::shared_ptr<ir::Allocate> returnAllocate;
     };

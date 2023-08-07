@@ -431,7 +431,7 @@ namespace front
             auto f_bb = ctx_.falseTargetBBStack.top();
             auto t_label = std::make_shared<ir::Label>(t_bb->getJPLabel());
             auto f_label = std::make_shared<ir::Label>(f_bb->getJPLabel());
-            auto bb = std::make_shared<ir::BasicBlock>("_lAnd_exit_" + std::to_string(ctx_.basicBlockCounter.next()), ir::BasicBlock::BlockType::Default);
+            auto bb = std::make_shared<ir::BasicBlock>("_" + ctx_.currentFunction->getName() + "_lAnd_exit_" + std::to_string(ctx_.basicBlockCounter.next()), ir::BasicBlock::BlockType::Default);
 
             auto user = std::any_cast<std::shared_ptr<ir::User>>(context->eqExp()->accept(this)); // Icmp, Fcmp or int StatciValue
             auto br = std::make_shared<ir::Br>(user, t_label, f_label, t_label->getName());
@@ -456,7 +456,7 @@ namespace front
             auto f_bb = ctx_.falseTargetBBStack.top();
             auto t_label = std::make_shared<ir::Label>(t_bb->getJPLabel());
             auto f_label = std::make_shared<ir::Label>(f_bb->getJPLabel());
-            auto bb = std::make_shared<ir::BasicBlock>("_lAnd_exit_" + std::to_string(ctx_.basicBlockCounter.next()), ir::BasicBlock::BlockType::Default);
+            auto bb = std::make_shared<ir::BasicBlock>("_" + ctx_.currentFunction->getName() + "_lAnd_exit_" + std::to_string(ctx_.basicBlockCounter.next()), ir::BasicBlock::BlockType::Default);
 
             ctx_.trueTargetBBStack.push(bb);
             context->lAndExp()->accept(this);
@@ -494,7 +494,7 @@ namespace front
     {
         try
         {
-            auto bb = std::make_shared<ir::BasicBlock>("_lOr_exit_" + std::to_string(ctx_.basicBlockCounter.next()), ir::BasicBlock::BlockType::Default);
+            auto bb = std::make_shared<ir::BasicBlock>("_" + ctx_.currentFunction->getName() + "_lOr_exit_" + std::to_string(ctx_.basicBlockCounter.next()), ir::BasicBlock::BlockType::Default);
 
             ctx_.falseTargetBBStack.push(bb);
             context->lOrExp()->accept(this);

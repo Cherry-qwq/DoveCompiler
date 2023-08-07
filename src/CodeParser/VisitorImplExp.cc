@@ -134,7 +134,7 @@ namespace front
                 if (!symuser->getType()->isArray())
                 {
                     // single no subscription lval
-                    auto load = std::make_shared<ir::Load>(symuser, "->load:" + symuser->getName());
+                    auto load = std::make_shared<ir::Load>(symuser, ctx_.newVRegName());
                     ctx_.currentBasicBlock->addInstruction(load);
                     return std::dynamic_pointer_cast<ir::User>(load);
                 }
@@ -338,14 +338,14 @@ namespace front
                         if (prim_type->isInt())
                         {
                             auto left = std::make_shared<ir::StaticValue>("Int", int32_t(0));
-                            auto add = std::make_shared<ir::Add>(left, right, "add");
+                            auto add = std::make_shared<ir::Add>(left, right, ctx_.newVRegName());
                             ctx_.currentBasicBlock->addInstruction(add);
                             return std::dynamic_pointer_cast<ir::User>(add);
                         }
                         else if (prim_type->isFloat())
                         {
                             auto left = std::make_shared<ir::StaticValue>("Float", float(0));
-                            auto fadd = std::make_shared<ir::FAdd>(left, right, "fadd");
+                            auto fadd = std::make_shared<ir::FAdd>(left, right, ctx_.newVRegName());
                             ctx_.currentBasicBlock->addInstruction(fadd);
                             return std::dynamic_pointer_cast<ir::User>(fadd);
                         }
@@ -361,14 +361,14 @@ namespace front
                         if (prim_type->isInt())
                         {
                             auto left = std::make_shared<ir::StaticValue>("Int", int32_t(0));
-                            auto sub = std::make_shared<ir::Sub>(left, right, "sub");
+                            auto sub = std::make_shared<ir::Sub>(left, right, ctx_.newVRegName());
                             ctx_.currentBasicBlock->addInstruction(sub);
                             return std::dynamic_pointer_cast<ir::User>(sub);
                         }
                         else if (prim_type->isFloat())
                         {
                             auto left = std::make_shared<ir::StaticValue>("Float", float(0));
-                            auto fsub = std::make_shared<ir::FSub>(left, right, "fsub");
+                            auto fsub = std::make_shared<ir::FSub>(left, right, ctx_.newVRegName());
                             ctx_.currentBasicBlock->addInstruction(fsub);
                             return std::dynamic_pointer_cast<ir::User>(fsub);
                         }
@@ -384,14 +384,14 @@ namespace front
                         if (prim_type->isInt())
                         {
                             auto left = std::make_shared<ir::StaticValue>("Int", int32_t(0));
-                            auto sub = std::make_shared<ir::Sub>(left, right, "sub");
+                            auto sub = std::make_shared<ir::Sub>(left, right, ctx_.newVRegName());
                             ctx_.currentBasicBlock->addInstruction(sub);
                             return std::dynamic_pointer_cast<ir::User>(sub);
                         }
                         else if (prim_type->isFloat())
                         {
                             auto left = std::make_shared<ir::StaticValue>("Float", float(0));
-                            auto fsub = std::make_shared<ir::FSub>(left, right, "fsub");
+                            auto fsub = std::make_shared<ir::FSub>(left, right, ctx_.newVRegName());
                             ctx_.currentBasicBlock->addInstruction(fsub);
                             return std::dynamic_pointer_cast<ir::User>(fsub);
                         }
@@ -514,19 +514,19 @@ namespace front
                     {
                         if (op == '*')
                         {
-                            auto mul = std::make_shared<ir::Mul>(left, right, left->getName() + "*" + right->getName());
+                            auto mul = std::make_shared<ir::Mul>(left, right, ctx_.newVRegName());
                             ctx_.currentBasicBlock->addInstruction(mul);
                             return std::dynamic_pointer_cast<ir::User>(mul);
                         }
                         else if (op == '/')
                         {
-                            auto div = std::make_shared<ir::SDiv>(left, right, left->getName() + "/" + right->getName());
+                            auto div = std::make_shared<ir::SDiv>(left, right, ctx_.newVRegName());
                             ctx_.currentBasicBlock->addInstruction(div);
                             return std::dynamic_pointer_cast<ir::User>(div);
                         }
                         else if (op == '%')
                         {
-                            auto rem = std::make_shared<ir::SRem>(left, right, left->getName() + "%" + right->getName());
+                            auto rem = std::make_shared<ir::SRem>(left, right, ctx_.newVRegName());
                             ctx_.currentBasicBlock->addInstruction(rem);
                             return std::dynamic_pointer_cast<ir::User>(rem);
                         };
@@ -535,13 +535,13 @@ namespace front
                     {
                         if (op == '*')
                         {
-                            auto mul = std::make_shared<ir::FMul>(left, right, left->getName() + "*" + right->getName());
+                            auto mul = std::make_shared<ir::FMul>(left, right, ctx_.newVRegName());
                             ctx_.currentBasicBlock->addInstruction(mul);
                             return std::dynamic_pointer_cast<ir::User>(mul);
                         }
                         else if (op == '/')
                         {
-                            auto div = std::make_shared<ir::FDiv>(left, right, left->getName() + "/" + right->getName());
+                            auto div = std::make_shared<ir::FDiv>(left, right, ctx_.newVRegName());
                             ctx_.currentBasicBlock->addInstruction(div);
                             return std::dynamic_pointer_cast<ir::User>(div);
                         }
@@ -642,13 +642,13 @@ namespace front
                         {
                         case '+':
                         {
-                            auto add = std::make_shared<ir::Add>(left, right, "add");
+                            auto add = std::make_shared<ir::Add>(left, right, ctx_.newVRegName());
                             ctx_.currentBasicBlock->addInstruction(add);
                             return std::dynamic_pointer_cast<ir::User>(add);
                         }
                         case '-':
                         {
-                            auto sub = std::make_shared<ir::Sub>(left, right, "sub");
+                            auto sub = std::make_shared<ir::Sub>(left, right, ctx_.newVRegName());
                             ctx_.currentBasicBlock->addInstruction(sub);
                             return std::dynamic_pointer_cast<ir::User>(sub);
                         }
@@ -662,13 +662,13 @@ namespace front
                         {
                         case '+':
                         {
-                            auto fadd = std::make_shared<ir::FAdd>(left, right, "fadd");
+                            auto fadd = std::make_shared<ir::FAdd>(left, right, ctx_.newVRegName());
                             ctx_.currentBasicBlock->addInstruction(fadd);
                             return std::dynamic_pointer_cast<ir::User>(fadd);
                         }
                         case '-':
                         {
-                            auto fsub = std::make_shared<ir::FSub>(left, right, "fsub");
+                            auto fsub = std::make_shared<ir::FSub>(left, right, ctx_.newVRegName());
                             ctx_.currentBasicBlock->addInstruction(fsub);
                             return std::dynamic_pointer_cast<ir::User>(fsub);
                         }

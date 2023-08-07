@@ -49,15 +49,15 @@ namespace front
             {
                 // static init
                 std::shared_ptr<ir::StaticValue> initVal = ir::MakeEmptyStaticValue(a_type, varName);
-                allocate = std::make_shared<ir::Allocate>(varName, false, initVal);
+                allocate = std::make_shared<ir::Allocate>("%" + varName, false, initVal);
             }
             else
             {
-                allocate = std::make_shared<ir::Allocate>(a_type, varName);
+                allocate = std::make_shared<ir::Allocate>(a_type, "%" + varName);
                 ctx_.currentBasicBlock->addInstruction(allocate);
             }
             auto sym = std::make_shared<Symbol>(allocate->getName(), allocate);
-            ctx_.symbolTable->addSymbolToCurrentScope(allocate->getName(), sym);
+            ctx_.symbolTable->addSymbolToCurrentScope(varName, sym);
 
             return allocate;
         }
@@ -98,17 +98,18 @@ namespace front
                 context->initVal()->accept(this);
                 ctx_.currentInitValue.pop();
 
-                allocate = std::make_shared<ir::Allocate>(varName, false, initVal);
+                allocate = std::make_shared<ir::Allocate>("%" + varName, false, initVal);
             }
             else
             {
-                allocate = std::make_shared<ir::Allocate>(a_type, varName);
+                allocate = std::make_shared<ir::Allocate>(a_type, "%" + varName);
                 ctx_.currentAllocate = allocate;
                 ctx_.currentBasicBlock->addInstruction(allocate);
                 context->initVal()->accept(this);
             }
+            
             auto sym = std::make_shared<Symbol>(allocate->getName(), allocate);
-            ctx_.symbolTable->addSymbolToCurrentScope(allocate->getName(), sym);
+            ctx_.symbolTable->addSymbolToCurrentScope(varName, sym);
 
             return allocate;
         }
